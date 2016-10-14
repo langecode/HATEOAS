@@ -636,14 +636,15 @@ paths:
           schema:
             $ref: '#/definitions/Error'
             
-  '/accounts/{no}/transactions/{txId}':
+  '/accounts/{no}/reconciled-transactions/{txId}':
     post:
-      summary: Flag a transaction entries for one account
+      summary: Flag a transaction entries for one account allowing the immutable nature of the transaction to be preserved and allowing the client to cache the immutable transactions really hard. This "pattern" makes it possible to consider immutable objects that needs som form of decoration to be unaffected by this decoration.
       consumes:
         - application/json
       produces:
         - application/hal+json;v=1
-        - application/hal+json;concept=Transaction;v=1
+        - application/hal+json;concept=DecoratedTransaction;v=1
+        - application/hal+json+decorated-transaction+1
       parameters:
         - name: no
           in: path
@@ -655,12 +656,12 @@ paths:
           description: Transaction Id 
           required: true
           type: string
-        - name: flag
+        - name: reconcile
           in: body
-          description: flag or unflag transaction
+          description: flag or unflag transaction and add a note to that particular transaction if desired
           required: true
           schema:
-            type: boolean
+            type: object
       responses:
         '200':
           description: OK
@@ -682,7 +683,8 @@ definitions:
         type: number
         format: double
       currency:
-        type: string \w{3}
+        type: string
+        pattern: \w{3}
   Error:
     type: object
     properties:
@@ -701,11 +703,13 @@ definitions:
         items:
           $ref: '#/definitions/HALLink'
       sid: 
-        type: string [a-z]+-[a-z]+-\d{4}-*\d*    
+        type: string 
+        pattern:  \[a-z]+-[a-z]+-\d{4}-*\d*
       fullName:
         type: string
       cpr:
-        type: string \d{10}   
+        type: string
+        pattern: \d{10}
   Account:
     type: object
     properties:
@@ -718,9 +722,14 @@ definitions:
         items:
           $ref: '#/definitions/Transactions'
       no:
-        type: string \d{4}-\d{10}
+        type: string
+        pattern: \d{4}-\d{10}
       balance:
         $ref: '#/definitions/Amount' 
+      owner:
+        $ref: '#/definitions/Person'
+      coOwner:
+        $ref: '#/definitions/Person'
   Transactions:
     type: object
     properties:
