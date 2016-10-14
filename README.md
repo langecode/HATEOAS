@@ -27,7 +27,7 @@ These are links that are relevant to this project.
 
 The [HAL Specification](http://stateless.co/hal_specification.html) and the Informational specification [here](https://tools.ietf.org/html/draft-kelly-json-hal-08)
 
-The [Swagger example for this HATEOAS HAL simple banking API](https://github.com/Nykredit/hateoas/simple-banking-api-hateoas-hal-sample.yaml)
+The [Swagger example for this HATEOAS HAL simple banking API](https://github.com/Nykredit/hateoas/Swagger/simple-banking-api-hateoas-hal-sample.yaml)
 
 A proposed HATEOAS HAL data seralization done in Jackson is available at [Nykredit GitHub](https://github.com/Nykredit/jackson-dataformat-hal)
 
