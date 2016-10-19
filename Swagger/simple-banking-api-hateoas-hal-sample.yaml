@@ -509,7 +509,7 @@ paths:
                       amount: 1098
                       currency: DKK
                     lastActivity: '2016-10-12'
-                    _link:
+                    _links:
                       owner: 
                         href: https://https://banking.services.sample-bank.dk/persons/tom-hansen-0304-32
                       transactions:
@@ -535,7 +535,7 @@ paths:
                       amount: -1998905.32
                       currency: DKK
                     lastActivity: '2016-09-30'
-                    _link:
+                    _links:
                       owner: 
                         href: https://https://banking.services.sample-bank.dk/persons/tom-andersen-hansen-0509-1
                       coOwner:
