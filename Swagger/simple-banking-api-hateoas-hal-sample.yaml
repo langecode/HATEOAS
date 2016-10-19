@@ -762,13 +762,13 @@ definitions:
         pattern: \d{4}-\d{5}
         description: the id for account and the natural non-sensitive sementical id
       balance:
-        description: the current balance of and currency of the account - sadly this contextual comment will be ignored
+        description: the current balance of and currency of the account - sadly this contextual comment will be ignored.This description is a warning in swagger, this is on purpose to illustrate a point.
         $ref: '#/definitions/Amount' 
       owner:
-        description: the owner of the account, which should be included as a link and thus avoid coupling to the person service for updates on anything else than the semantical id and thus the link. It would be useful to be able to include the projection of Person to embed - if the Account Service will endure the coupling for embedding persons such as the owner at a more spohisticated level than just the link. Therefore support for embedding of particular types and projections in Swagger would be nice.
+        description: the owner of the account, which should be included as a link and thus avoid coupling to the person service for updates on anything else than the semantical id and thus the link. It would be useful to be able to include the projection of Person to embed - if the Account Service will endure the coupling for embedding persons such as the owner at a more spohisticated level than just the link. Therefore support for embedding of particular types and projections in Swagger would be nice. This description is a warning in swagger, this is on purpose to illustrate a point.
         $ref: '#/definitions/Person'
       coOwner:
-        description: the co-owner of the account, which should be included as a link and thus avoid coupling to the person service for updates on anything else than the semantical id and thus the link. It would be useful to be able to include the projection of Person to embed - if the Account Service will endure the coupling for embedding persons such as the owner at a more spohisticated level than just the link. Therefore support for embedding of particular types and projections in Swagger would be nice.
+        description: the co-owner of the account, which should be included as a link and thus avoid coupling to the person service for updates on anything else than the semantical id and thus the link. It would be useful to be able to include the projection of Person to embed - if the Account Service will endure the coupling for embedding persons such as the owner at a more spohisticated level than just the link. Therefore support for embedding of particular types and projections in Swagger would be nice. This description is a warning in swagger, this is on purpose to illustrate a point.
         $ref: '#/definitions/Person'  
       _links:
         type: object
@@ -776,9 +776,8 @@ definitions:
           $ref: '#/definitions/HALLink'
       _embedded:
         type: object
-        properties:
-          owner: object
-          coOwner: object
+        items:
+          $ref: '#/definitions/MixOfDifferentObjects'
   Transactions:
     type: object
     properties:
@@ -804,10 +803,10 @@ definitions:
         items:
           $ref: '#/definitions/HALLink'
       amount:
-        description: the amount and currency of the tranaction registered - sadly this contextual comment will be ignored
+        description: the amount and currency of the tranaction registered - sadly this contextual comment will be ignored. This description is a warning in swagger, this is on purpose to illustrate a point concerning context support.
         $ref: '#/definitions/Amount'
       balance:
-        description: the current balance of the account after the tranaction was registered - sadly this contextual comment will be ignored
+        description: the current balance of the account after the tranaction was registered - sadly this contextual comment will be ignored.This description is a warning in swagger, this is on purpose to illustrate a point concerning context support.
         $ref: '#/definitions/Amount'
       description:
         type: string
@@ -864,4 +863,8 @@ definitions:
       type:
         type: string
         description: the specific content-type including version and concept
+        
+  MixOfDifferentObjects:
+    type: object
+    description: a way for specifying how objects of different types are linked and especially embedded into Swagger is needed in order to be able to deliver a precise API description of what an API actually offers to the clients.
         
