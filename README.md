@@ -31,7 +31,7 @@ where a proposed implementation has not yet been done.
 
 #The Proposal
 The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for the HATEOAS part and use capabilities_ for functionality like:
- [see example in swagger.yaml](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml) 
+
  * **selection** 
    * client can ask for a certain object or set of objects 
    * based on concrete values of one or more attributes in json objects at a given endpoint
@@ -56,7 +56,7 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
    * clients can ask for "sparse" objects (if possible) 
    * based on specifying dynamic projections or views of the desired json to be returned from an endpoint
    * a query parameter _"filter"_ is used for that
-    
+
 * **composition** 
    * clients can signal what "related" information is desired (if possible) 
    * based on "object-type" (concept) and view specified.
@@ -64,6 +64,9 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
 
  The capabilities will signal to the service, what the consumers of the service expects it to be able to deliver - or at least what the clients would like it to deliver.
  That is a way for the service to evolve or for service-spin-off's and that will be able to help services stay relevant and also to maximaxe the business value for these services.
+ Please see [example in swagger.yaml](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml) it is best viewed in the 
+ [Swagger editor](http://editor.swagger.io/#/) where it is possible to import the file or paste the yaml file into the editor. 
+
 
 # Links
 These are links that are relevant to this project.
