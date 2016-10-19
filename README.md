@@ -72,30 +72,30 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
  This is similar to the hypertext cache pattern in HAL, where clients knows that the __links_ object is contained and the __embedded_ object may or may not be contained.
 
 * **Semantic ID creation** - for sensitive natural id's
-The creation of semantic ids is necessary in situations where the natural semantic id is sensitive and thus cannor be part of the url. 
-An example of this is a personal id used for people in Denmark called CPR number. This number is protected by law and thus this must not be used as semantic id for a person.
-Persons therefore needs a new non-sensitive id, which can be created from the first name, a potential middle name, the family name, the day in month where the person was born, 
-the month of the year where the person was born and if not unique add a sequencenumber. 
+ The creation of semantic ids is necessary in situations where the natural semantic id is sensitive and thus cannor be part of the url. 
+ An example of this is a personal id used for people in Denmark called CPR number. This number is protected by law and thus this must not be used as semantic id for a person.
+ Persons therefore needs a new non-sensitive id, which can be created from the first name, a potential middle name, the family name, the day in month where the person was born,
+ the month of the year where the person was born and if not unique add a sequencenumber. 
+ 
+ This is very similar to the MIFID CONCAT defintions where they unfortunately have used
+ "#" for separation and a length that will cause:
+   * the names to be less human readable
+   * result in name clashes
+   * not useful as semantical ids for person in a URL
+   * require more added sequence numbers. 
 
-This is very similar to the MIFID CONCAT defintions where they unfortunately have used
-"#" for separation and a length that will cause:
-  * the names to be less human readable
-  * result in name clashes
-  * not useful as semantical ids for person in a URL
-  * require more added sequence numbers. 
+ Therefore the proposed format is:
+       <firstname>-<middlename-><familyname>-<ddMM><-sequence number>
 
-Therefore the proposed format is:
-    <firstname>-<middlename-><familyname>-<ddMM><-sequence number>
+    _examples:_
+      hans-peter-hansen-0112
+      hans-peter-hansen-0112-1 (if two persons with the same name and born on the same day and month exists)
+      mike-hansson-0109 
 
-_examples:_
-    hans-peter-hansen-0112
-    hans-peter-hansen-0112-1 (if two persons with the same name and born on the same day and month exists)
-    mike-hansson-0109 
+ If a "restricted length scenario" exist a length of 10 characters for firstname, and 10 characters for middlename 
+ and equally 10 characters for familyname has been suggested and 999 as max sequence number.
 
-If a "restricted length scenario" exist a length of 10 characters for firstname, and 10 characters for middlename 
-and equally 10 characters for familyname has been suggested and 999 as max sequence number.
-
-Such llimitations should be written as a part of the service API and thus the consumers of services would know them.    
+ Such llimitations should be written as a part of the service API and thus the consumers of services would know them.    
 
 # Links
 These are links that are relevant to this project.
