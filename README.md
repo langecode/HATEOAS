@@ -35,23 +35,28 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
  * **selection** 
    * client can ask for a certain object or set of objects 
    * based on concrete values of one or more attributes in json objects at a given endpoint
-   * a query parameter _"select"_ is used for that 
+   * a query parameter _"select"_ is used for that
+
  * **sorting** 
    * client can ask for a sorted set objects 
    * based on concrete attibutes in json objects at a given endpoint
-   * a query parameter _"sort"_ is used for that 
+   * a query parameter _"sort"_ is used for that
+
  * **temporal filter** 
    * client can ask for object(s) within a certain temporal limit 
    * based on the ability to filter within a fixed or dynamic interval and to specify the desired returned collection from an endpoint
-   * a query parameter _"interval"_ is used for that 
+   * a query parameter _"interval"_ is used for that
+
  * **pagination** 
    * clients can ask for particular object(s) with a range 
    * where the number of concrete elements can be specified as desiredto be within the returned collection from an endpoint
-   * a query parameter _"elements"_ is used for that 
+   * a query parameter _"elements"_ is used for that
+
 * **filter** 
    * clients can ask for "sparse" objects (if possible) 
    * based on specifying dynamic projections or views of the desired json to be returned from an endpoint
-   * a query parameter _"filter"_ is used for that 
+   * a query parameter _"filter"_ is used for that
+    
 * **composition** 
    * clients can signal what "related" information is desired (if possible) 
    * based on "object-type" (concept) and view specified.
