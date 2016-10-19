@@ -65,7 +65,11 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
  The capabilities will signal to the service, what the consumers of the service expects it to be able to deliver - or at least what the clients would like it to deliver.
  That is a way for the service to evolve or for service-spin-off's and that will be able to help services stay relevant and also to maximaxe the business value for these services.
  Please see [example in swagger.yaml](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml) it is best viewed in the 
- [Swagger editor](http://editor.swagger.io/#/) where it is possible to import the file or paste the yaml file into the editor. 
+ [Swagger editor](http://editor.swagger.io/#/) where it is possible to import the file or paste the yaml file into the editor.
+
+ Clients should be tolerant reader's and thus they cannot be sure that all services supports a cpability, 
+ which is why the clients needs to cope with the situation that a certain capability is not supported. 
+ This is similar to the hypertext cache pattern in HAL, where clients knows that the __links_ object is contained and the __embedded_ object may or may not be contained.
 
 
 # Links
