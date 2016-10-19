@@ -30,26 +30,32 @@ These elaborate examples will include references to code that is already created
 where a proposed implementation has not yet been done. 
 
 #The Proposal
-The proposal is to used [HAL](http://stateless.co/hal_specification.html) for the HATEOAS part and use capabilities for functionality like:
+The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for the HATEOAS part and use capabilities_ for functionality like:
  [see example in swagger.yaml](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml) 
- * selection 
+ * **selection** 
    * client can ask for a certain object or set of objects 
-   * based on concrete values of one or more attributes in json objects at a given endpoint 
- * sorting 
+   * based on concrete values of one or more attributes in json objects at a given endpoint
+   * a query parameter _"select"_ is used for that 
+ * **sorting** 
    * client can ask for a sorted set objects 
    * based on concrete attibutes in json objects at a given endpoint
- * temporal filter 
+   * a query parameter _"sort"_ is used for that 
+ * **temporal filter** 
    * client can ask for object(s) within a certain temporal limit 
    * based on the ability to filter within a fixed or dynamic interval and to specify the desired returned collection from an endpoint
- * pagination 
+   * a query parameter _"interval"_ is used for that 
+ * **pagination** 
    * clients can ask for particular object(s) with a range 
    * where the number of concrete elements can be specified as desiredto be within the returned collection from an endpoint
- * filter 
+   * a query parameter _"elements"_ is used for that 
+* **filter** 
    * clients can ask for "sparse" objects (if possible) 
    * based on specifying dynamic projections or views of the desired json to be returned from an endpoint
- * composition 
+   * a query parameter _"filter"_ is used for that 
+* **composition** 
    * clients can signal what "related" information is desired (if possible) 
    * based on "object-type" (concept) and view specified.
+   * a query parameter _"embed"_ is used for that 
 
  The capabilities will signal to the service, what the consumers of the service expects it to be able to deliver - or at least what the clients would like it to deliver.
  That is a way for the service to evolve or for service-spin-off's and that will be able to help services stay relevant and also to maximaxe the business value for these services.
