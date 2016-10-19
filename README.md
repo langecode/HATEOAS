@@ -90,8 +90,12 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
     _examples:_
     ```
       hans-peter-hansen-0112
-      hans-peter-hansen-0112-1 (if two persons with the same name and born on the same day and month exists)
-      mike-hansson-0109 
+
+      hans-peter-hansen-0112-1 
+      "The second is created if two persons with the same 
+      name and born on the same day and month exists"
+
+      mike-hansson-0309 
     ```
  If a "restricted length scenario" exist a length of 10 characters for firstname, and 10 characters for middlename 
  and equally 10 characters for familyname has been suggested and 999 as max sequence number.
