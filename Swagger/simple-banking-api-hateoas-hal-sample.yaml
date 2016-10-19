@@ -477,6 +477,7 @@ tags:
   - name: temporal
     description: The resource supports temporal selection of returned objects.
 paths:
+
   /accounts:
     get:
       summary: Get an account listing
@@ -499,6 +500,19 @@ paths:
             $ref: '#/definitions/Accounts'
           examples:
             application/hal+json;concept=Account;v=1: 
+              accounts: 2
+              total: 2
+              _links:
+                self:
+                  href: https://banking.services.sample-bank.dk/accounts
+                  title: All accessible accounts
+                accounts:
+                  - self: 
+                    href: accounts/1234-567890
+                    title: Student Account
+                  - self: 
+                    href: accounts/1234-67891
+                    title: Nem Account
               _embedded:
                 accounts:
                   - no: '1234-56789'
@@ -544,10 +558,6 @@ paths:
                         href: >-
                           https://banking.services.sample-bank.dk/accounts/1234-67891/transactions{?elements}
                         templated: true
-              _links:
-                self:
-                  href: https://banking.services.sample-bank.dk/accounts
-                  title: All accessible accounts
         '400':
           description: Bad Request
         '404':
@@ -558,6 +568,7 @@ paths:
              $ref: '#/definitions/Error'
         '503':
           description: Service not available now - try later
+          
   '/accounts/{no}/transactions':
     get:
       tags:
@@ -586,8 +597,13 @@ paths:
         - name: sort
           type: string
           in: query
-          description: sort based on attributes in transaction
+          description: sorting based on attributes in transaction
           required: false
+        - name: interval
+          type: string
+          in: query
+          description: limit result according to temporal aspects
+          required: false  
         - name: elements
           type: string
           in: query
@@ -599,7 +615,18 @@ paths:
           schema:
             $ref: '#/definitions/Transactions'
           examples:
-            application/hal+json;concept=Transaction;v=1: 
+            application/hal+json;concept=Transaction;v=1:
+              _links:
+                transactions:
+                  - self: 
+                      href: accounts/1234-567890/transactions/987654321
+                      title: Netto - Dankort ***7766
+                  - self: 
+                      href: accounts/1234-567890/transactions/987654322
+                      title: ElGiganten - Master kort ***4455
+                  - self:
+                      href: accounts/1234-567890/transactions/987654323
+                      title: Small things Inc. - VISA kort ***6655
               _embedded:
                 transactions:
                   - time: 2016-08-26 11:01
@@ -652,7 +679,7 @@ paths:
             $ref: '#/definitions/Error'
             
   '/accounts/{no}/reconciled-transactions/{txId}':
-    post:
+    put:
       summary: Flag a transaction entries for one account allowing the immutable nature of the transaction to be preserved and allowing the client to cache the immutable transactions really hard. This "pattern" makes it possible to consider immutable objects that needs som form of decoration to be unaffected by this decoration.
       consumes:
         - application/json
@@ -663,7 +690,7 @@ paths:
       parameters:
         - name: no
           in: path
-          description: Account Id \d{4}-\d{10}
+          description: Account Id \d{4}-\d{5}
           required: true
           type: string
         - name: txId
@@ -676,7 +703,7 @@ paths:
           description: flag or unflag transaction and add a note to that particular transaction if desired
           required: true
           schema:
-            type: object
+            $ref: '#/definitions/DecoratedAccount'
       responses:
         '200':
           description: OK
@@ -720,42 +747,55 @@ definitions:
       sid: 
         type: string 
         pattern:  \[a-z]+-[a-z]+-\d{4}-*\d*
+        description: this is the non-sensitive semantic id for person
       fullName:
         type: string
       cpr:
         type: string
         pattern: \d{10}
+        description: do not use this in queries as this is sensitive information
   Account:
     type: object
     properties:
+      no:
+        type: string
+        pattern: \d{4}-\d{5}
+        description: the id for account and the natural non-sensitive sementical id
+      balance:
+        description: the current balance of and currency of the account - sadly this contextual comment will be ignored
+        $ref: '#/definitions/Amount' 
+      owner:
+        description: the owner of the account, which should be included as a link and thus avoid coupling to the person service for updates on anything else than the semantical id and thus the link. It would be useful to be able to include the projection of Person to embed - if the Account Service will endure the coupling for embedding persons such as the owner at a more spohisticated level than just the link. Therefore support for embedding of particular types and projections in Swagger would be nice.
+        $ref: '#/definitions/Person'
+      coOwner:
+        description: the co-owner of the account, which should be included as a link and thus avoid coupling to the person service for updates on anything else than the semantical id and thus the link. It would be useful to be able to include the projection of Person to embed - if the Account Service will endure the coupling for embedding persons such as the owner at a more spohisticated level than just the link. Therefore support for embedding of particular types and projections in Swagger would be nice.
+        $ref: '#/definitions/Person'  
       _links:
         type: object
         items:
           $ref: '#/definitions/HALLink'
       _embedded:
         type: object
-        items:
-          $ref: '#/definitions/Transactions'
-      no:
-        type: string
-        pattern: \d{4}-\d{10}
-      balance:
-        $ref: '#/definitions/Amount' 
-      owner:
-        $ref: '#/definitions/Person'
-      coOwner:
-        $ref: '#/definitions/Person'
+        properties:
+          owner: object
+          coOwner: object
   Transactions:
     type: object
     properties:
-      _embedded:
-        type: object
-        items:
-          $ref: '#/definitions/Transaction'
+      transactions: 
+        type: integer
+        description: the number of transactions in response
+      total: 
+        type: integer
+        description: the total number of transactions on an account
       _links:
         type: object
         items:
           $ref: '#/definitions/HALLink'     
+      _embedded:
+        type: object
+        items:
+          $ref: '#/definitions/Transaction'
   Transaction:
     type: object
     properties:
@@ -764,34 +804,64 @@ definitions:
         items:
           $ref: '#/definitions/HALLink'
       amount:
+        description: the amount and currency of the tranaction registered - sadly this contextual comment will be ignored
         $ref: '#/definitions/Amount'
       balance:
+        description: the current balance of the account after the tranaction was registered - sadly this contextual comment will be ignored
         $ref: '#/definitions/Amount'
       description:
         type: string
+        description: the description of a transaction given by the service
       date:
         type: string
-        format: date     
+        format: date
+        description: the time for te transaction to be recorded by the service
+  DecoratedAccount:
+    type: object
+    description: a way to decorate immutable objects such as transactions and thus let them be cachable for a long time, whereas this is more volatile and thus cannor be cached at the same level. This is to separate concepts.
+    properties:
+      _links:
+        $ref: '#/definitions/Transaction'
+      reconciled:
+        type: boolean
+        description: the user can signal whether the transaction was reconciled or not
+      note: 
+        type: string
+        description: the user can write a note on the transaction to know that
+      category:
+        type: string
+        description: the sort of category
   Accounts:
     type: object
     properties:
-      _embedded:
-        type: object
-        items:
-          $ref: '#/definitions/Account'
+      accounts:
+        type: integer
+        description: the number of accounts in response
+      total:
+        type: integer
+        description: the number of accounts in all
       _links:
         type: object
         items:
           $ref: '#/definitions/HALLink'         
+      _embedded:
+        type: object
+        items:
+          $ref: '#/definitions/Account'
   HALLink:
     type: object
+    description: the HAL link is specified in the specification chapter 5
     properties:
       href:
         type: string
+        description: the full reference to a related resource
       name:
         type: string  
+        description: a reference to a related resource as secondary identifier
       title:
         type: string
+        description: a human readable reference to a related resource
       type:
         type: string
+        description: the specific content-type including version and concept
         
