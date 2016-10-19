@@ -175,6 +175,13 @@ info:
         select="balance::100+|balance::1000-"
         which returns accounts having an balance between 100 and 1000 (both inclusive).
     
+    #### Yet another example:
+
+        <https://banking.services.sample-bank.dk/acccounts?select="no::123456789+|no::234567890">
+        
+        select="no::123456789+|no::234567890"
+        which returns the to accounts having account numbers "123456789" and "234567890" and thus it works as a way to selct certain objects, in this case based on the semantic key for an account which is the number of that account.
+    
     ### Sorting API Capability
     
     Sorting is done using a `sort` Query Parameter.
@@ -297,6 +304,7 @@ info:
     If the server-side intercepts the consumer it may choose to return a 429 Too many Requests with a response stating that "You are limited to XXXX requests per hour per `access_token` or `client_id` in total per  per `timeunit` overall. 
     
     ## Responses
+
     The responses from calling resources in the API adheres to the specificsation of HTTP 1.1 and thus the status code, the headers used are found in that specification.
     
     ### Status Codes
@@ -760,4 +768,3 @@ definitions:
         type: string
       type:
         type: string
-        
