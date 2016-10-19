@@ -100,7 +100,7 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
  If a "restricted length scenario" exist a length of 10 characters for firstname, and 10 characters for middlename 
  and equally 10 characters for familyname has been suggested and 999 as max sequence number.
 
- Such llimitations should be written as a part of the service API and thus the consumers of services would know them.    
+ Such limitations should be written as a part of the service API and thus the consumers of services would know them.    
 
 # Links
 These are links that are relevant to this project.
