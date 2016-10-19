@@ -101,7 +101,7 @@ info:
     * `"application/hal+json"` for the newest version of user information in hal format
     
     
-    It is possible to express the same without using the parameters as shown above using:
+    It is possible to express the same without using the parameters as shown above using - although less elegant and less HTTPish:
     
     
     * `"application/hal+json+user+1"` for the complete user json in hal format
@@ -163,21 +163,24 @@ info:
     
     #### The concrete url would look like: 
    
-         <https://banking.services.sample-bank.dk/acccounts?select="balance::100">
+         <https://banking.services.sample-bank.dk/
+                  acccounts?select="balance::100">
          
          "balance::100"
          which returns accounts having an exact balance of 100. 
 
     #### Another example:
 
-        <https://banking.services.sample-bank.dk/acccounts?select="balance::100+|balance::1000-">
+        <https://banking.services.sample-bank.dk/
+                 acccounts?select="balance::100+|balance::1000-">
         
         select="balance::100+|balance::1000-"
         which returns accounts having an balance between 100 and 1000 (both inclusive).
-    
+        
     #### Yet another example:
 
-        <https://banking.services.sample-bank.dk/acccounts?select="no::123456789+|no::234567890">
+        <https://banking.services.sample-bank.dk/
+                 acccounts?select="no::123456789+|no::234567890">
         
         select="no::123456789+|no::234567890"
         which returns the to accounts having account numbers "123456789" and "234567890" and thus it works as a way to selct certain objects, in this case based on the semantic key for an account which is the number of that account.
@@ -188,18 +191,21 @@ info:
     Sorting can be done ascending (default) or descending
     
           The syntax is: sort="<attribute>+/-|<atribute>+/-|..."
+          and is equivalent to: sort="<attribute>::+/-|<atribute>::+/-|..."
     
     The usage can be examplfied as an
     
     #### Example:
     
-        <https://banking.services.sample-bank.dk/acccounts?sort=balance> 
+        <https://banking.services.sample-bank.dk/
+                 acccounts?sort=balance> 
         which returns an ascending set of accounts sorted by balance
     
     
     #### Another example is: 
     
-        <https://banking.services.sample-bank.dk/acccounts?select=balance|lastUpdate-> 
+        <https://banking.services.sample-bank.dk/
+                 acccounts?select=balance|lastUpdate-> 
         which returns a set of account sorted decending by 
         lastUpdate and ascending by balance. 
     
@@ -208,20 +214,25 @@ info:
     Temporal aspects are handled using the `interval` Query Parameter.
     
     
-          The syntax is: interval="<now/from/to/+/-##d/######>|<now/from/to/+/-##d/######>"
+          The syntax is: interval="<now/from/to/at/::+/-/#d/#/now>|
+                                   <now/from/to/at/::+/-/#d/#>"
     
     #### Example:
     
-        <https://banking.services.sample-bank.dk/accounts/1234-56789/transactions?interval="from::-14d|to::now">
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789/transactions?interval="from::-14d|to::now">
         which returns the transactions from a specific account within the last 14 days
     
-    #### Example:
+    #### Another example:
     
-        <https://banking.services.sample-bank.dk/accounts/1234-56789/transactions?interval="from::1476449846|to::now">
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789/transactions?interval="from::1476449846|to::now">
         
-        <https://banking.services.sample-bank.dk/accounts/1234-56789/transactions?interval="from::1476449846">
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789/transactions?interval="from::1476449846">
         
-        <https://banking.services.sample-bank.dk/accounts/1234-56789/transactions?interval="at::1476449846">
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789/transactions?interval="at::1476449846">
         
         The latter three returns the transactions from a specific account 
         within the last day assuming now is friday the. 
@@ -236,7 +247,8 @@ info:
     
     #### Example:
     
-         <https://banking.services.sample-bank.dk/accounts/1234-56789/transactions?elements="10|30"> 
+         <https://banking.services.sample-bank.dk/
+                  accounts/1234-56789/transactions?elements="10|30"> 
          which returns element 10 as the first entry in the json 
          response and element 30 as the last entry in the reponse.
     
@@ -255,7 +267,8 @@ info:
     
     #### Example:    
     
-        <https://banking.services.sample-bank.dk/accounts/1234-56789?filter="balance::-|name::-"> 
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789?filter="balance::-|name::-"> 
         which ideally returns a account object in the response without balance 
         and name attributes.
         The service may however in the event that this is not supported,
@@ -264,7 +277,8 @@ info:
     
     #### Example:
     
-        <https://banking.services.sample-bank.dk/accounts/1234-56789?filter="balance::+|name::+">
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789?filter="balance::+|name::+">
         which ideally returns a account object in the response with only balance
         and name attributes.
         The service may however in the event that this is not supported,
@@ -279,7 +293,8 @@ info:
         
     #### Example:
     
-        <https://banking.services.sample-bank.dk/accounts/1234-56789?embed="transaction::list|owner::sparse"
+        <https://banking.services.sample-bank.dk/
+                 accounts/1234-56789?embed="transaction::list|owner::sparse"
         
         embed="transaction::list|owner::sparse"
         which ideally will return a json response including `_links` and `_embeddded` objects inside the response containing either a map or array of transactions with links in the `_links` object and the desired projection in the `_embedded` object for both owner and transactions. 
@@ -293,6 +308,17 @@ info:
     
     Other suggested methids for doing has been to create a hash(sensitive sementic key), which might work but will be woulnerable for a brute force reengineering effort. The reponse to that is often to salt it, that is salt(hash(sensitive sementic key)), and that is ok but is seems merely to be a very difficult way to create a UUID, which means we have a key that is developer unfriendly - at least compared to the more human readable key consisting of recoqnizable fragments from the real world.
     
+    The suggested approach is firstname-middlename-familyname-ddMM-sequencenumber
+    
+    #### Example:
+    
+        hans-p-hansen-0112 the initial created Hans P Hansen born on the 1st of December
+        hans-p-hansen-0112-1 the second created Hans P Hansen born on the 1st of December
+        hans-p-hansen-0112-94 the 95th created Hans P Hansen born on the 1st of December
+     
+        mike-hansson-0309 the intialle created Mike Hansson born on the 3rd of September
+     
+    
     ## Ressilience
     
     
@@ -304,7 +330,7 @@ info:
     If the server-side intercepts the consumer it may choose to return a 429 Too many Requests with a response stating that "You are limited to XXXX requests per hour per `access_token` or `client_id` in total per  per `timeunit` overall. 
     
     ## Responses
-
+    
     The responses from calling resources in the API adheres to the specificsation of HTTP 1.1 and thus the status code, the headers used are found in that specification.
     
     ### Status Codes
@@ -768,3 +794,4 @@ definitions:
         type: string
       type:
         type: string
+        
