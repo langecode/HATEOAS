@@ -1,7 +1,7 @@
 # HATEOAS
 HATEOAS is used in REST services in various ways and has different forms.
 The goal of this repository is to start working for a common accepted way to use HATEOAS in REST services and Micro Services.
-The form of HATEOAS used here is HAL, because it features bot the linking posibility and a composition perspective. 
+The form of HATEOAS used here is HAL, because it features both the linking possibility and a composition perspective. 
 Both things affects the freedom to vary the size and coupling between services and 
 has a significant influence on the Developer Experience for the APIs using it.
 
@@ -12,8 +12,8 @@ capabilities in an easy way in the description of the API as well as providing a
 and in that way help developers to be more productive and deliver more business value.  
 
 The ultimate goal of this project is to evolve these best practices to a level of maturity, where they could make that into reference 
-implemntations of REST and possible the standards such as e.g. JAX-RS. The initial approach however is to have developers working with 
-it and mature this into something with a broad apeal to developers of REST services and having proven itself to be useful for service implementation. 
+implementations of REST and possible the standards such as e.g. JAX-RS. The initial approach however is to have developers working with 
+it and mature this into something with a broad appeal to developers of REST services and having proven itself to be useful for service implementation. 
 
 ### Why are we doing this? 
 The primary aim is to help service developers to create better services that are easier to keep on developing and we of course need that ourselves.
@@ -39,7 +39,7 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
 
  * **sorting** 
    * client can ask for a sorted set objects 
-   * based on concrete attibutes in json objects at a given endpoint
+   * based on concrete attributes in json objects at a given endpoint
    * a query parameter _"sort"_ is used for that
 
  * **temporal filter** 
@@ -49,7 +49,7 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
 
  * **pagination** 
    * clients can ask for particular object(s) with a range 
-   * where the number of concrete elements can be specified as desiredto be within the returned collection from an endpoint
+   * where the number of concrete elements can be specified as desired to be within the returned collection from an endpoint
    * a query parameter _"elements"_ is used for that
 
 * **filter** 
@@ -63,25 +63,25 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
    * a query parameter _"embed"_ is used for that 
 
  The capabilities will signal to the service, what the consumers of the service expects it to be able to deliver - or at least what the clients would like it to deliver.
- That is a way for the service to evolve or for service-spin-off's and that will be able to help services stay relevant and also to maximaxe the business value for these services.
+ That is a way for the service to evolve or for service-spin-off's and that will be able to help services stay relevant and also to maximize the business value for these services.
  Please see [example in swagger.yaml](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml) it is best viewed in the 
  [Swagger editor](http://editor.swagger.io/#/) where it is possible to import the file or paste the yaml file into the editor.
 
- Clients should be tolerant reader's and thus they cannot be sure that all services supports a cpability, 
+ Clients should be tolerant reader's and thus they cannot be sure that all services supports a capability, 
  which is why the clients needs to cope with the situation that a certain capability is not supported. 
  This is similar to the hypertext cache pattern in HAL, where clients knows that the __links_ object is contained and the __embedded_ object may or may not be contained.
 
 * **Semantic ID creation** - for sensitive natural id's
- The creation of semantic ids is necessary in situations where the natural semantic id is sensitive and thus cannor be part of the url. 
+ The creation of semantic ids is necessary in situations where the natural semantic id is sensitive and thus cannot be part of the url. 
  An example of this is a personal id used for people in Denmark called CPR number. This number is protected by law and thus this must not be used as semantic id for a person.
  Persons therefore needs a new non-sensitive id, which can be created from the first name, a potential middle name, the family name, the day in month where the person was born,
- the month of the year where the person was born and if not unique add a sequencenumber. 
+ the month of the year where the person was born and if not unique add a sequence number. 
  
- This is very similar to the MIFID CONCAT defintions where they unfortunately have used
+ This is very similar to the MIFID CONCAT definitions where they unfortunately have used
  "#" for separation and a length that will cause:
    * the names to be less human readable
    * result in name clashes
-   * not useful as semantical ids for person in a URL
+   * not useful as semantic ids for person in a URL
    * require more added sequence numbers. 
 
  Therefore the proposed format is:
@@ -97,8 +97,8 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
 
       mike-hansson-0309 
     ```
- If a "restricted length scenario" exist a length of 10 characters for firstname, and 10 characters for middlename 
- and equally 10 characters for familyname has been suggested and 999 as max sequence number.
+ If a "restricted length scenario" exist a length of 10 characters for first name, and 10 characters for middle name 
+ and equally 10 characters for family name has been suggested and 999 as max sequence number.
 
  Such limitations should be written as a part of the service API and thus the consumers of services would know them.    
 
@@ -108,8 +108,8 @@ These are links that are relevant to this project.
 The [HAL Specification](http://stateless.co/hal_specification.html) and the Informational specification [here](https://tools.ietf.org/html/draft-kelly-json-hal-08)
 
 The [Swagger example for this HATEOAS HAL simple banking API](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml)
-The file is best viewed in the [Swagger editior](http://editor.swagger.io/#/) and import the file insode the editor.
+The file is best viewed in the [Swagger editior](http://editor.swagger.io/#/) and import the file inside the editor.
 
-A proposed HATEOAS HAL data seralization done in Jackson is available at [Nykredit GitHub](https://github.com/Nykredit/jackson-dataformat-hal)
+A proposed HATEOAS HAL data serialization done in Jackson is available at [Nykredit GitHub](https://github.com/Nykredit/jackson-dataformat-hal)
 
 
