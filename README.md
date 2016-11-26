@@ -103,7 +103,7 @@ The proposal is to _use [HAL](http://stateless.co/hal_specification.html) for th
  Such limitations should be written as a part of the service API and thus the consumers of services would know them.    
 
 * **Services**
- A description of the communication between services and the use of /_link and /_embedded as well as recommendations to keep links and potential embedded objects relevant for consumers of services can be found [here]()https://github.com/Nykredit/hateoas/blob/master/examplesUsingHAL.md.
+ A description of the communication between services and the use of /_link and /_embedded as well as recommendations to keep links and potential embedded objects relevant for consumers of services can be found [here](https://github.com/Nykredit/hateoas/blob/master/examplesUsingHAL.md).
  
 
 # Links
