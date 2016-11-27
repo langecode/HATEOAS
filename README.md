@@ -1,5 +1,5 @@
 # HATEOAS
-HATEOAS is used in REST services in various ways and has different forms.
+HATEOAS is used in REST services in various ways and has different forms. Read more on the [wiki](https://github.com/Nykredit/HATEOAS/wiki)
 The goal of this repository is to start working for a common accepted way to use HATEOAS in REST services and Micro Services.
 The form of HATEOAS used here is HAL, because it features both the linking possibility and a composition perspective. 
 Both things affects the freedom to vary the size and coupling between services and 
@@ -114,6 +114,8 @@ The [HAL Specification](http://stateless.co/hal_specification.html) and the Info
 The [Swagger example for this HATEOAS HAL simple banking API](https://github.com/Nykredit/hateoas/blob/master/Swagger/simple-banking-api-hateoas-hal-sample.yaml)
 The file is best viewed in the [Swagger editior](http://editor.swagger.io/#/) and import the file inside the editor.
 
+The is more material to be read on the [wiki](https://github.com/Nykredit/HATEOAS/wiki)
+
 A proposed HATEOAS HAL data serialization done in Jackson is available at [Nykredit GitHub](https://github.com/Nykredit/jackson-dataformat-hal)
 
-
+A Maven archetype targetted for services using this principle is under development and will be available soon.
