@@ -241,7 +241,7 @@ info:
     ### Pagination API Capability 
     
     Pagination of responses is obtained by using the Query parameter `elements`.
-    The Query Parameter `element` signals the initial element and the last element that is desired to be part of the response.
+    The Query Parameter `elements` signals the initial element and the last element that is desired to be part of the response.
     
         The syntax is: elements="<startingFrom>|<endingAt>" both inclusive.
     
@@ -464,18 +464,21 @@ tags:
     description: >-
       The resource supports sorting of entries based on attribute values and
       direction.
-  - name: paginate
+  - name: elements
     description: The resource supports paginations of entries based on page and page size.
   - name: filter
     description: >-
       The resource supports filtering of returned json objects based on
       attribute values.
-  - name: compose
+  - name: embed
     description: >-
       The resource supports embedding of related json objects in the returned
       result based on relation and views/projections.
-  - name: temporal
+  - name: interval
     description: The resource supports temporal selection of returned objects.
+  - name: immutable
+    description: >-
+      The ressource contains immutable instances and thus they can be cached for a very long period of time without loosing their relevance for the client.
 paths:
 
   /accounts:
@@ -572,10 +575,10 @@ paths:
   '/accounts/{no}/transactions':
     get:
       tags:
-      - search
       - sort
-      - paginate
-      - temporal
+      - elements
+      - interval
+      - immutable
       summary: Get transactions for one account
       consumes:
         - application/json
@@ -867,4 +870,4 @@ definitions:
   MixOfDifferentObjects:
     type: object
     description: a way for specifying how objects of different types are linked and especially embedded into Swagger is needed in order to be able to deliver a precise API description of what an API actually offers to the clients.
-        
+    
