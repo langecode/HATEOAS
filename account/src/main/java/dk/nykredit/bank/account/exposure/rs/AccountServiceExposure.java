@@ -146,7 +146,7 @@ public class AccountServiceExposure {
     }
 
     @GET
-    @Produces({"application/hal+json;concept=accountoverview;v=1","application/hal+json+accountoverview+1"})
+    @Produces({"application/hal+json+accountoverview+1"})
     @LogDuration(limit = 50)
     public Response listServiceGen1Version1(@Context UriInfo uriInfo, @Context Request request) {
         List<Account> accounts = archivist.listAccounts();
@@ -157,7 +157,7 @@ public class AccountServiceExposure {
 
     @GET
     @Path("{regNo}-{accountNo}")
-    @Produces({"application/hal+json;concept=account;v=1","application/hal+json+account+1"})
+    @Produces({"application/hal+json+account+1"})
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
@@ -182,7 +182,7 @@ public class AccountServiceExposure {
 
     @GET
     @Path("{regNo}-{accountNo}")
-    @Produces({"application/hal+json;concept=account;v=2","application/hal+json+account+2"})
+    @Produces({"application/hal+json+account+2"})
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does

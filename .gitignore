@@ -97,4 +97,5 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 
-# Created by .ignore support plugin (hsz.mobi)
+# Created in order to avoid unintentional updates - as these are amputated classes derived from internal frameworks
+/account/src/main/java/dk/nykredit/nic/

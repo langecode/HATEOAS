@@ -104,7 +104,7 @@ public class ReconciledTransactionServiceExposure {
     }
 
     @GET
-    @Produces({"application/hal+json;concept=reconciledtransactionoverview;v=1","application/hal+json+reconciledtransactionoverview+1" })
+    @Produces({"application/hal+json+reconciledtransactionoverview+1" })
     @LogDuration(limit = 50)
     public Response listReconciledTransactionsSG1V1(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
                                           @Context UriInfo uriInfo, @Context Request request) {
@@ -117,7 +117,7 @@ public class ReconciledTransactionServiceExposure {
 
     @GET
     @Path("{id}")
-    @Produces({"application/hal+json;concept=reconciledtransaction;v=1","application/hal+json+reconciledtransaction+1" })
+    @Produces({"application/hal+json+reconciledtransaction+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does

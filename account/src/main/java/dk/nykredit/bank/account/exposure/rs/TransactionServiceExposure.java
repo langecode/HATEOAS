@@ -133,7 +133,7 @@ public class TransactionServiceExposure {
     }
 
     @GET
-    @Produces({"application/hal+json;concept=transactionoverview;v=1","application/hal+json+transactionoverview+1" })
+    @Produces({"application/hal+json+transactionoverview+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
@@ -158,7 +158,7 @@ public class TransactionServiceExposure {
 
     @GET
     @Path("{id}")
-    @Produces({"application/hal+json;concept=transaction;v=1","application/hal+json+transaction+1" })
+    @Produces({"application/hal+json+transaction+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does

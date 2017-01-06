@@ -32,7 +32,7 @@ import java.util.*;
 @PermitAll
 @Path("/account-events")
 @DeclareRoles("tx-system")
-@Api(value = "/",
+@Api(value = "/account-events",
      tags = {"events"},
      description = "The event resource informs you about what happened to a particular account, this simple example resource" +
         " will contain information on new transactions related to the account, changes to the account name, changes to the number " +
@@ -45,8 +45,7 @@ public class EventServiceExposure {
     private AccountArchivist archivist;
 
     @GET
-    @Path("/account-events")
-    @Produces({"application/hal+json;concept=metadata", "application/hal+json+metadata" })
+    @Produces({"application/hal+json+metadata" })
     @ApiOperation(
             value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
@@ -60,7 +59,6 @@ public class EventServiceExposure {
     }
 
     @GET
-    @Path("/account-events")
     @Produces({"application/hal+json" })
     @ApiOperation(
             value = "obtain all events emitted by the account-event service", response = EventsRepresentation.class,
@@ -110,9 +108,8 @@ public class EventServiceExposure {
         return getSG1V1(category, id, uriInfo, request);
     }
 
-
-    @GET
-    @Produces({"application/hal+json;concept=events;v=1","application/hal+json+account+events+1"})
+    //@GET  // annotation commented out otherwise it will not deploy
+    //@Produces({"application/hal+json+account+events+1"}) // annotation commented out otherwise it will not deploy
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
@@ -121,6 +118,28 @@ public class EventServiceExposure {
      * "application/hal+json;concept=AccountEvent;v=1.0.0" is removed and replaced with
      * "{"application/hal+json+account+event+1" then the endpoint vil work with versioning.
      * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
+     *
+     * In this case if you are running WebLogic 12.2.1 you will have to intercept the accept-headers in the general
+     * listAll method and delegate to this if the content-type is "application/hal+json+account+event+1" or if you want
+     * you can do this manually for all content-types and then only have new @Produces annotation set on the default
+     * producer and manually delegate from there.
+     *
+     * This is not the semantically best way imho, therefore it would be very nice if the
+     * https://java.net/jira/browse/JERSEY-3003
+     *
+     * was implemented following:
+     * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html and
+     * https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7
+     * <code>
+     * HTTP uses Internet Media Types [17] in the Content-Type (section 14.17) and Accept (section 14.1) header
+     * fields in order to provide open and extensible data typing and type negotiation.
+     *   media-type     = type "/" subtype *( ";" parameter )
+     *   type           = token
+     *   subtype        = token
+     *
+     * Parameters MAY follow the type/subtype in the form of attribute/value pairs (as defined in section 3.6).
+     * of https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6
+     * </code>
      */
     public Response listAllSG1V1(String interval, UriInfo uriInfo, Request request) {
         Optional<Interval> withIn = Interval.getInterval(interval);
@@ -133,7 +152,7 @@ public class EventServiceExposure {
 
     @GET
     @Path("{category}")
-    @Produces({"application/hal+json;concept=eventcategory;v=1","application/hal+json+account+eventcategory+1" })
+    @Produces({"application/hal+json+account+eventcategory+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
@@ -155,7 +174,7 @@ public class EventServiceExposure {
 
     @GET
     @Path("{category}/{id}")
-    @Produces({"application/hal+json;concept=event;v=1","application/hal+json+account+event+1" })
+    @Produces({"application/hal+json+account+event+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
@@ -176,7 +195,7 @@ public class EventServiceExposure {
     }
 
     @GET
-    @Produces({"application/hal+json;concept=metadata;v=1", "application/hal+json+metadata+1" })
+    @Produces({"application/hal+json+metadata+1" })
     @LogDuration(limit = 50)
     public Response getMetaDataSG1V1(@Context UriInfo uriInfo) {
         EventsMetadataRepresentation em  = new EventsMetadataRepresentation("", uriInfo);
