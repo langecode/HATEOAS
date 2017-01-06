@@ -32,7 +32,7 @@ import java.util.*;
 @PermitAll
 @Path("/account-events")
 @DeclareRoles("tx-system")
-@Api(value = "/",
+@Api(value = "/account-events",
      tags = {"events"},
      description = "The event resource informs you about what happened to a particular account, this simple example resource" +
         " will contain information on new transactions related to the account, changes to the account name, changes to the number " +
@@ -45,7 +45,6 @@ public class EventServiceExposure {
     private AccountArchivist archivist;
 
     @GET
-    @Path("/account-events")
     @Produces({"application/hal+json;concept=metadata", "application/hal+json+metadata" })
     @ApiOperation(
             value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
@@ -60,7 +59,6 @@ public class EventServiceExposure {
     }
 
     @GET
-    @Path("/account-events")
     @Produces({"application/hal+json" })
     @ApiOperation(
             value = "obtain all events emitted by the account-event service", response = EventsRepresentation.class,
