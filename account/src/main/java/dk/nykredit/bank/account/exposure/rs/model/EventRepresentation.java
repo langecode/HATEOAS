@@ -1,0 +1,100 @@
+package dk.nykredit.bank.account.exposure.rs.model;
+
+import dk.nykredit.bank.account.exposure.rs.EventServiceExposure;
+import dk.nykredit.bank.account.model.Event;
+import dk.nykredit.jackson.dataformat.hal.HALLink;
+import dk.nykredit.jackson.dataformat.hal.annotation.Link;
+import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.ws.rs.core.UriInfo;
+
+/**
+ * Represents a single transaction in its default projection as returned by the REST service.
+ */
+@Resource
+@ApiModel(value="Transaction",
+        description="An immutable event")
+
+public class EventRepresentation {
+    private String id;
+    private String time;
+    private String sequence;
+    private String category;
+
+    @Link
+    private HALLink self;
+
+    @Link
+    private HALLink origin;
+
+
+    public EventRepresentation(Event event, UriInfo uriInfo) {
+        this.id = event.getId();
+        this.time = event.getTime().toString();
+        this.sequence = event.getSequence().toString();
+        this.category = event.getCategory();
+        this.self = new HALLink.Builder(uriInfo.getBaseUriBuilder()
+                .path(EventServiceExposure.class)
+                .path(EventServiceExposure.class, "getSingle")
+                .build(event.getCategory(), event.getId())).build();
+        this.origin = new HALLink.Builder(uriInfo.getBaseUriBuilder()
+                .path(event.getOrigin() != null ? event.getOrigin().getPath() : "no path")
+                .build())
+                .build();
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "id",
+            notes = "a semantic (here shown as UUID) identifier for the event.",
+            value = "Readable and Writeable")
+    public String getId() {
+        return id;
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "time",
+            notes = "the human readable time of when the event occurred.",
+            value = "Readable and Writeable")
+    public String getTime() {
+        return time;
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "sequence",
+            notes = "the sequence - in this example to show that time and sequence can be used for idempotency.",
+            value = "Readable and Writeable")
+    public String getSequence() {
+        return sequence;
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "category",
+            notes = "the category - in which the event has been grouped into. Default is (default) if no category has been set.",
+            value = "Readable and Writeable")
+    public String getCategory() {
+        return category;
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "origin",
+            notes = "link to the cause of the event - e.g. a link to a name change in account.")
+    public HALLink getOrigin() {
+        return origin;
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "self",
+            notes = "link to the event itself.")
+    public HALLink getSelf() {
+        return self;
+    }
+
+}

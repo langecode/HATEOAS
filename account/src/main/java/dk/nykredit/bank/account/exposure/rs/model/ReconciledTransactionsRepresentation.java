@@ -1,0 +1,57 @@
+package dk.nykredit.bank.account.exposure.rs.model;
+
+import dk.nykredit.bank.account.exposure.rs.ReconciledTransactionServiceExposure;
+import dk.nykredit.bank.account.model.Account;
+import dk.nykredit.jackson.dataformat.hal.HALLink;
+import dk.nykredit.jackson.dataformat.hal.annotation.EmbeddedResource;
+import dk.nykredit.jackson.dataformat.hal.annotation.Link;
+import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
+/**
+ * Represents a set of reconciled transactions as returned by the REST service.
+ */
+@Resource
+@ApiModel(value="ReconciledTransactions",
+        description="A list containing the mutable decorator instances each having link to their immutable counterpart transaction to keep its immutability")
+public class ReconciledTransactionsRepresentation {
+    @EmbeddedResource("reconciledTransactions")
+    private Collection<ReconciledTransactionRepresentation> rtxs;
+
+    @Link
+    private HALLink self;
+
+    public ReconciledTransactionsRepresentation(Account account, UriInfo uriInfo) {
+        rtxs = new ArrayList<>();
+        rtxs.addAll(account.getReconciledTransactions().stream()
+                .map(rtx -> new ReconciledTransactionRepresentation(rtx, rtx.getTransaction(), uriInfo))
+                .collect(Collectors.toList()));
+        this.self = new HALLink.Builder(uriInfo.getBaseUriBuilder()
+                .path(ReconciledTransactionServiceExposure.class)
+                .build(account.getRegNo(), account.getAccountNo()))
+                .build();
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "reconciledtransactions",
+            notes = "the list of reconciled transaction.")
+    public Collection<ReconciledTransactionRepresentation> getReconciledTransactions() {
+        return Collections.unmodifiableCollection(rtxs);
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "self",
+            notes = "link to the reconciled transaction list.")
+    public HALLink getSelf() {
+        return self;
+    }
+}

@@ -119,3 +119,73 @@ The is more material to be read on the [wiki](https://github.com/Nykredit/HATEOA
 A proposed HATEOAS HAL data serialization done in Jackson is available at [Nykredit GitHub](https://github.com/Nykredit/jackson-dataformat-hal)
 
 A Maven archetype targetted for services using this principle is under development and will be available soon.
+
+Nykredit Sample HATEOAS Service
+===============================
+
+The REST HATEOAS/HAL service shows a simple service using HATEOAS/HAL.
+
+The example has a simple resource - "account" - which is assembled into one deployable war file.
+
+The example is not complete and that is intentionally as the example is for exemplifying aspects of development using
+HATEOAS and HAL.
+
+A note on the use of content-types for versioning in the individual endpoint
+------------------------------------------------------------------------------
+The content-types here are shown for the semantic correct version using content-type parameters and the "hack" where
+the a new type is used to support containers that does not support the content-type parameters yet.
+
+The project show the correct and the incorrect as shown below:
+
+    @Produces({"application/hal+json;concept=account;v=1","application/hal+json+account+1"})
+
+This is the correct producer (which will work in WildFly - but currently does not deploy in WebLogic)
+
+    @Produces({"application/hal+json;concept=account;v=1"})
+
+To produce code that works across WebLogic and WildFly you unfortunately have to use the incorrect one as shown below:
+
+    @Produces({"application/hal+json+account+1"})
+
+About This Code
+---------------
+The code have some dependencies that needs access to internal repositories and that will be reduced over
+time by lifting libraries into the public part of github, the sample her should be seen as an example that
+needs a bit of configuration
+
+An OAuth2 compliant endpoint is necessary (not included due to commercial right issues), which means the integration
+tests running in AccountServiceExposureIT requiring security will not run.
+
+
+Useful Commands
+---------------
+
+To build the whole project:
+
+    mvn package
+
+To build project including running integration tests:
+
+    mvn verify
+
+To run in Wildfly:
+
+    mvn -N -Pwildfly cargo:run
+
+To run in WebLogic:
+
+    mvn -N -Pweblogic cargo:run
+
+To redeploy in Wildfly
+
+    mvn -N -Pwildfly cargo:redeploy
+
+To redeploy in WebLogic
+
+    mvn -N -Pweblogic cargo:redeploy
+
+Admin console
+-------------
+The WebLogic console may be accessed from http://localhost:7001/console using username "weblogic" and password "weblogic1".
+The JBoss console may be accessed from http://localhost:9990 using username "advisor1" and password "passw0rd".
+

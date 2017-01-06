@@ -1,0 +1,31 @@
+"securityDefinitions": {
+  "oauth":{
+    "type": "oauth2",
+    "flow": "implicit",
+    "authorizationUrl": "https://banking.services.sample-bank.dk/token.oauth2?grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=JWT",
+    "scopes":{
+      "owners": "get access to own account",
+      "coOwners": "get access to co-owned accounts",
+      "poa": "get access on a owner's behalf"
+    }
+  },
+  "key":{
+    "type": "apiKey",
+    "in": "header",
+    "name": "access_token"
+  },
+  "Bearer": {
+    "type": "apiKey",
+    "name": "Authorization",
+    "in": "header"
+  }
+},
+"security": [{
+  "oauth": [
+    "owners",
+    "coOwners",
+    "poa"
+    ]
+  },{
+    "key": []
+  }]
