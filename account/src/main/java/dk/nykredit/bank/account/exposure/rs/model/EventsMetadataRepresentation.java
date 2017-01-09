@@ -1,5 +1,7 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
+import javax.ws.rs.core.UriInfo;
+
 import dk.nykredit.bank.account.exposure.rs.EventServiceExposure;
 import dk.nykredit.jackson.dataformat.hal.HALLink;
 import dk.nykredit.jackson.dataformat.hal.annotation.Link;
@@ -7,17 +9,20 @@ import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.ws.rs.core.UriInfo;
-
 /**
- * a very simple metadata representation for Events
+ * A very simple metadata representation for Events
  *
  */
 @Resource
-@ApiModel(value="EventsMetadata",
-        description="A very simple way of delivering metadata to the consumer of a service")
-
+@ApiModel(value = "EventsMetadata",
+        description = "A very simple way of delivering metadata to the consumer of a service")
 public class EventsMetadataRepresentation {
+
+    private String DEFAULT = "{\"events\": {\n" +
+            "           \"description\": \"This is a very simple non-persisted edition of the metadata for events on account\","+
+            "           \"purpose\": \"To show that it is easy to deliver information as part of the service and not only in the API docs\""+
+            "           \"supported-versions\": \"This is only in the current initial version 1\""+
+            "}}";
 
     @Link
     private HALLink self;
@@ -31,13 +36,6 @@ public class EventsMetadataRepresentation {
     public HALLink getSelf() {
         return self;
     }
-
-
-    private String DEFAULT = "{\"events\": {\n" +
-            "           \"description\": \"This is a very simple non-persisted edition of the metadata for events on account\","+
-            "           \"purpose\": \"To show that it is easy to deliver information as part of the service and not only in the API docs\""+
-            "           \"supported-versions\": \"This is only in the current initial version 1\""+
-            "}}";
 
     /**
       * @param metadata must be formatted as valid JSON, rig now it is ignored and replaced with a static JSON document

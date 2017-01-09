@@ -1,5 +1,7 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
+import javax.ws.rs.core.UriInfo;
+
 import dk.nykredit.bank.account.exposure.rs.ReconciledTransactionServiceExposure;
 import dk.nykredit.bank.account.exposure.rs.TransactionServiceExposure;
 import dk.nykredit.bank.account.model.ReconciledTransaction;
@@ -10,14 +12,13 @@ import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.ws.rs.core.UriInfo;
 
 /**
  * Represents a single transaction as returned by the REST service in a default projection.
  */
 @Resource
-@ApiModel(value="Reconciledtransaction",
-        description="A mutable decorator for a transaction to keep its immutability")
+@ApiModel(value = "Reconciledtransaction",
+        description = "A mutable decorator for a transaction to keep its immutability")
 public class ReconciledTransactionRepresentation {
 
     private String id;

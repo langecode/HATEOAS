@@ -33,21 +33,12 @@ public class Account extends AbstractAuditable {
     @Column(name = "TID", length = 36, nullable = false, columnDefinition = "CHAR(36)")
     private String tId;
 
-    /**
-     * Very very rudimentary modelling of account only used for the sake of the example.
-     */
     @Column(name = "REG_NO", length = 4, nullable = false)
     private String regNo;
 
-    /**
-     * Very very rudimentary modelling of account only used for the sake of the example.
-     */
     @Column(name = "ACCOUNT_NO", length = 12, nullable = false)
     private String accountNo;
 
-    /**
-     * Very very rudimentary modelling of account only used for the sake of the example.
-     */
     @Column(name = "NAME", length = 40, nullable = false)
     private String name;
 

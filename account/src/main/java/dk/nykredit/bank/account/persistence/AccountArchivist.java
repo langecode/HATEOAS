@@ -1,12 +1,18 @@
 package dk.nykredit.bank.account.persistence;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 
 import dk.nykredit.api.capabilities.Element;
 import dk.nykredit.api.capabilities.Interval;
@@ -102,7 +108,8 @@ public class AccountArchivist {
      * @param withIn     the interval which the returned items needs to stay within
      * @param sortAs     attribute to sort by, default is time and supports sorting by amount
      */
-    public List<Transaction> getTransactions(String regNo, String accountNo, Optional<Element> elementSet, Optional<Interval> withIn, List< Sort> sortAs) {
+    public List<Transaction> getTransactions(String regNo, String accountNo, Optional<Element> elementSet, Optional<Interval> withIn,
+            List< Sort> sortAs) {
         StringBuilder qs = new StringBuilder("select t from Transaction t where t.account.regNo=:regNo and t.account.accountNo=:accountNo");
         if (withIn.isPresent()) {
             qs.append(" and t.lastModifiedTime>:startsAt and t.lastModifiedTime<:endsAt");
@@ -130,7 +137,7 @@ public class AccountArchivist {
 
     /**
      * this merely shows that the persistence does not have to support the complete API Capability set
-     * sometimes the use of these capabilities willaxa   cause the query to be designed in order to deliver results
+     * sometimes the use of these capabilities will cause the query to be designed in order to deliver results
      * in a good and efficient way to the users of the API.
      */
     private List<Transaction> reduceElements(Element elementSet, List<Transaction> txs) {
@@ -163,25 +170,22 @@ public class AccountArchivist {
     }
 
     public List<Event> getEventsForCategory(String category, Optional<Interval> withIn) {
-        StringBuilder qs = new StringBuilder ("select e from Event e " +
-                "where e.category=:category");
+        StringBuilder qs = new StringBuilder ("select e from Event e where e.category=:category");
         if (withIn.isPresent()) {
             qs.append(" and t.lastModifiedTime>:startsAt and t.lastModifiedTime<:endsAt");
         }
         TypedQuery<Event> q = em.createQuery(qs.toString(), Event.class);
         q.setParameter("category", category);
         if (withIn.isPresent()) {
-            Timestamp ts = Timestamp.from(withIn.get().getStart().toInstant());
-            q.setParameter("startsAt", ts);
-            Timestamp te = Timestamp.from(withIn.get().getEnd().toInstant());
-            q.setParameter("endsAt", te);
+            Interval intv = withIn.get();
+            q.setParameter("startsAt", Timestamp.from(intv.getStart().toInstant()));
+            q.setParameter("endsAt", Timestamp.from(intv.getEnd().toInstant()));
         }
         return q.getResultList();
     }
 
     public Event getEvent(String category, String id) {
-        TypedQuery<Event> q = em.createQuery("select e from Event e " +
-                "where e.category=:category and e.id=:sid", Event.class);
+        TypedQuery<Event> q = em.createQuery("select e from Event e where e.category=:category and e.id=:sid", Event.class);
         q.setParameter("category", category);
         q.setParameter("sid", id);
         return q.getResultList().get(0);

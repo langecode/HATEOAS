@@ -1,27 +1,41 @@
 package dk.nykredit.bank.account.exposure.rs;
 
-import dk.nykredit.api.capabilities.Interval;
-import dk.nykredit.bank.account.exposure.rs.model.*;
-import dk.nykredit.bank.account.model.Event;
-import dk.nykredit.bank.account.persistence.AccountArchivist;
-import dk.nykredit.nic.core.logging.LogDuration;
-import dk.nykredit.nic.rs.EntityResponseBuilder;
-import dk.nykredit.time.CurrentTime;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import java.util.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import dk.nykredit.api.capabilities.Interval;
+import dk.nykredit.bank.account.exposure.rs.model.EventRepresentation;
+import dk.nykredit.bank.account.exposure.rs.model.EventsMetadataRepresentation;
+import dk.nykredit.bank.account.exposure.rs.model.EventsRepresentation;
+import dk.nykredit.bank.account.model.Event;
+import dk.nykredit.bank.account.persistence.AccountArchivist;
+import dk.nykredit.nic.core.logging.LogDuration;
+import dk.nykredit.nic.rs.EntityResponseBuilder;
+import dk.nykredit.time.CurrentTime;
+
+import io.swagger.annotations.*;
 
 /**
  * REST exposure of events that are related to the account.
+ *
  * category - can be regNo-accountNo if the events are related to a given account and that would be the case for eg. transactions
  * belonging to a given account. The default category is named (default) but any category can be used, it has to unique though.
  *
@@ -33,10 +47,7 @@ import java.util.*;
 @Path("/account-events")
 @DeclareRoles("tx-system")
 @Api(value = "/account-events",
-     tags = {"events"},
-     description = "The event resource informs you about what happened to a particular account, this simple example resource" +
-        " will contain information on new transactions related to the account, changes to the account name, changes to the number " +
-             "of users using the account etc. The example is created to examplify simple use of HATEOAS/HAL ")
+     tags = {"events"})
 public class EventServiceExposure {
     private static final String CONCEPT_NAME = "accountEvent";
     private static final String CONCEPT_VERSION = "1.0.0";
@@ -45,9 +56,10 @@ public class EventServiceExposure {
     private AccountArchivist archivist;
 
     @GET
-    @Produces({"application/hal+json;concept=metadata", "application/hal+json+metadata" })
+    @Produces({"application/hal+json;concept=metadata", "application/hal+json+metadata"})
     @ApiOperation(
             value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
+            authorizations = {@Authorization( value = "Bearer")},
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service",
@@ -59,12 +71,13 @@ public class EventServiceExposure {
     }
 
     @GET
-    @Produces({"application/hal+json" })
+    @Produces({"application/hal+json"})
     @ApiOperation(
             value = "obtain all events emitted by the account-event service", response = EventsRepresentation.class,
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
-                    "subscribers to the aoount service should be able to listen for and react to. In other words this is the authoritative" +
+                    "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service",
+            authorizations = {@Authorization( value = "Bearer"), @Authorization(value = "oauth")},
             tags = {"interval", "events"},
             nickname = "listAllEvents"
     )
@@ -77,11 +90,11 @@ public class EventServiceExposure {
     @GET
     @Path("{category}")
     @Produces({ "application/hal+json" })
-    @ApiOperation(
-            value = "obtain all events emitted by the account-event service scoped to a certain category", response = EventsRepresentation.class,
+    @ApiOperation(value = "obtain all events scoped to a certain category", response = EventsRepresentation.class,
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service, allowing for subscribers to have these grouped into categories",
+            authorizations = {@Authorization( value = "Bearer"), @Authorization(value = "oauth")},
             tags = {"interval", "events"},
             nickname = "getEventsByCategory"
     )
@@ -98,6 +111,7 @@ public class EventServiceExposure {
     @ApiOperation(
             value = "obtain the individual events from an account", response = EventRepresentation.class,
             notes = "the event her is immutable and thus can be cached for a long time",
+            authorizations = {@Authorization( value = "Bearer"), @Authorization(value = "oauth")},
             tags = {"immutable", "events"},
             nickname = "getEvent")
     @ApiResponses(value = {
@@ -110,14 +124,14 @@ public class EventServiceExposure {
 
 
     @GET
-    @Produces({"application/hal+json;concept=events;v=1","application/hal+json+account+events+1"})
+    @Produces({"application/hal+json;concept=events;v=1", "application/hal+json+account+events+1"})
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
      * not support the specification of the Accept header and thus does not support the media-range
      * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=AccountEvent;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+event+1" then the endpoint vil work with versioning.
+     * "application/hal+json;concept=TransactionOverview;v=1.0.0" is removed and replaced with
+     * "{"application/hal+json+account+event+1" then the endpoint will work with versioning.
      * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
      */
     public Response listAllSG1V1(String interval, UriInfo uriInfo, Request request) {
@@ -131,14 +145,14 @@ public class EventServiceExposure {
 
     @GET
     @Path("{category}")
-    @Produces({"application/hal+json;concept=eventcategory;v=1","application/hal+json+account+eventcategory+1" })
+    @Produces({"application/hal+json;concept=eventcategory;v=1", "application/hal+json+account+eventcategory+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
      * not support the specification of the Accept header and thus does not support the media-range
      * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=TransactionOverview;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+event+1" then the endpoint vil work with versioning.
+     * "application/hal+json;concept=AccountEvent;v=1.0.0" is removed and replaced with
+     * "{"application/hal+json+account+event+1" then the endpoint will work with versioning.
      * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
      */
     public Response listByCategorySG1V1(@PathParam("category") String category,
@@ -153,14 +167,14 @@ public class EventServiceExposure {
 
     @GET
     @Path("{category}/{id}")
-    @Produces({"application/hal+json;concept=event;v=1","application/hal+json+account+event+1" })
+    @Produces({"application/hal+json;concept=event;v=1", "application/hal+json+account+event+1" })
     @LogDuration(limit = 50)
     /**
      * If you are running a JEE container that inhibits the creation of resources, because it does
      * not support the specification of the Accept header and thus does not support the media-range
      * parameters, a simple producer has to be annotated and if the
      * "application/hal+json;concept=Event;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+event+1" then the endpoint vil work with versioning.
+     * "{"application/hal+json+account+event+1" then the endpoint will work with versioning.
      * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
      */
     public Response getSG1V1(@PathParam("category") String category, @PathParam("id") String id,

@@ -1,5 +1,9 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
+import java.util.Set;
+
+import javax.ws.rs.core.UriInfo;
+
 import dk.nykredit.bank.account.exposure.rs.AccountServiceExposure;
 import dk.nykredit.bank.account.exposure.rs.TransactionServiceExposure;
 import dk.nykredit.bank.account.model.Account;
@@ -10,16 +14,13 @@ import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.ws.rs.core.UriInfo;
-import java.util.Set;
-
 
 /**
  * Represents a single Account as returned from REST service in the sparse projection.
  */
 @Resource
-@ApiModel(value="AccountSparse",
-        description="the Account kin a sparse projection")
+@ApiModel(value = "AccountSparse",
+        description = "the Account kin a sparse projection")
 
 public class AccountSparseRepresentation {
     private String regNo;
@@ -53,6 +54,7 @@ public class AccountSparseRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "regno",
+            example = "1234",
             notes = "the registration number preceeding the account  number.",
             value = "Read-only")
     public String getRegNo() {
@@ -62,6 +64,7 @@ public class AccountSparseRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "accountno",
+            example = "12345678",
             notes = "the account  number.",
             value = "Read-only")
     public String getAccountNo() {
@@ -71,6 +74,7 @@ public class AccountSparseRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "name",
+            example = "NemKonto",
             notes = "the human readable name of the account.",
             value = "Readable and Writeable")
     public String getName() {

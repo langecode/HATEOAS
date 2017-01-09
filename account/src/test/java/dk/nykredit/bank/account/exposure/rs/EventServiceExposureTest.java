@@ -79,8 +79,7 @@ public class EventServiceExposureTest {
 
         Collection<EventRepresentation> ers = events.getEvents();
         int found = 0;
-        for (Iterator<EventRepresentation> iterator = ers.iterator(); iterator.hasNext(); ) {
-            EventRepresentation eventRepresentation = iterator.next();
+        for (EventRepresentation eventRepresentation : ers) {
             if("default".equals(eventRepresentation.getCategory())) {
                 assertEquals("http://mock/accounts/default/eventSID", eventRepresentation.getOrigin().getHref());
                 assertEquals("default", eventRepresentation.getCategory());

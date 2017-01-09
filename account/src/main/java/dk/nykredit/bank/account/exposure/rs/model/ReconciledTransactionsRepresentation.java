@@ -1,5 +1,12 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.core.UriInfo;
+
 import dk.nykredit.bank.account.exposure.rs.ReconciledTransactionServiceExposure;
 import dk.nykredit.bank.account.model.Account;
 import dk.nykredit.jackson.dataformat.hal.HALLink;
@@ -9,18 +16,12 @@ import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
-
 /**
  * Represents a set of reconciled transactions as returned by the REST service.
  */
 @Resource
-@ApiModel(value="ReconciledTransactions",
-        description="A list containing the mutable decorator instances each having link to their immutable counterpart transaction to keep its immutability")
+@ApiModel(value = "ReconciledTransactions",
+        description = "A list containing the mutable decorator instances each having link to their immutable counterpart transaction to keep its immutability")
 public class ReconciledTransactionsRepresentation {
     @EmbeddedResource("reconciledTransactions")
     private Collection<ReconciledTransactionRepresentation> rtxs;

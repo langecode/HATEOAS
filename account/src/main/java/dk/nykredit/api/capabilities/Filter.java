@@ -1,9 +1,15 @@
 package dk.nykredit.api.capabilities;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * The Query parameters filter is used for signalling to the server that a dynamic projection is desired as the response from the service. The service is not obliged to be able to do that, but may return the standard projection of the objects given for that concrete endpoint. This can be used for discovery of what projections service consumers would like to have and help evolving the API to stay relevant and aligned with the consumers use of the service.
+ * Filter signals a dynamic projection needed from a consumer perspective.
+ *
+ * The Query parameters filter is used for signalling to the server that a dynamic projection is desired as the response from the service.
+ * The service is not obliged to be able to do that, but may return the standard projection of the objects given for that concrete endpoint.
+ * This can be used for discovery of what projections service consumers would like to have and
+ * help evolving the API to stay relevant and aligned with the consumers use of the service.
  * <p>
  * The syntax is: {@literal(filter="<attribute>::+/-|<attribute>::+/-")}
  * + means include only
@@ -32,7 +38,7 @@ import java.util.*;
  * the Filter Capability must be extended for these cases and that will enable the a variable mapping from the
  * representation and on to the model.
  *
- * The reponsibility for the mapping is chosen to be done in this layer as an extension in order to avoid having the
+ * The responsibility for the mapping is chosen to be done in this layer as an extension in order to avoid having the
  * Model "infected" with mapping to and from the representations. Another choice could have been to let the
  * representation(s) do that and that would have concrete model class persistable field knowledge in the representation(s)
  * which is not desirable and thus the choice was to let the Filter class take that responsibility and thus extensions can handle
@@ -42,7 +48,7 @@ import java.util.*;
 public class Filter {
     private static final String REGEX = "^([a-zA-Z_0-9]+[a-zA-Z_0-9]*(::-|::\\+|:: |::)?)(\\|[a-zA-Z_0-9]+[a-zA-Z_0-9]*(::-|::\\+|:: |::)?)*";
     private static final CapabilityParser<Filter> PARSER = new CapabilityParser<>(REGEX, Filter::parseToken, Filter::duplicate);
-    
+
     private String attribute = "";
     private Inclusion inclusion = Inclusion.INC;
 
@@ -54,20 +60,21 @@ public class Filter {
     /**
      * @return the attribute that is part of default projection
      */
-    public String getAttribute(){
+    public String getAttribute() {
         return attribute;
     }
 
     /**
      * @return the information on whether the default projection attribute is part of the Filter aka. the dynamic projection or not
      */
-    public Inclusion getInclusion(){
+    public Inclusion getInclusion() {
         return inclusion;
     }
 
     /**
-     * delivers the set of attributes that can be part of a dynamic projection
-     * the syntax supported os given be the regexp: <code>"^([a-zA-Z_0-9]+[a-zA-Z_0-9]*(::-|::\\+|:: |::)?)(\\|[a-zA-Z_0-9]+[a-zA-Z_0-9]*(::-|::\\+|:: |::)?)*"</code>
+     * Delivers the set of attributes that can be part of a dynamic projection.
+     * The syntax supported is given by the regexp: 
+     * <code>"^([a-zA-Z_0-9]+[a-zA-Z_0-9]*(::-|::\\+|:: |::)?)(\\|[a-zA-Z_0-9]+[a-zA-Z_0-9]*(::-|::\\+|:: |::)?)*"</code>
      * @param filter a string containing the criteria for a dynamic projection either include or exclude as principle {@link Inclusion}
      * @return the resulting attributes and the inclusion or exclusion of these
      *
@@ -75,13 +82,13 @@ public class Filter {
     public static List<Filter> getFilter(String filter) {
         return PARSER.parse(filter);
     }
- 
+
     private static Optional<Filter> parseToken(String token) {
         String attribute = getAttributeFrom(token);
         Inclusion inc = getInclusion(token);
         return Optional.of(new Filter(attribute, inc));
     }
-    
+
     private static boolean duplicate(Filter filter1, Filter filter2) {
         return filter1.attribute.equals(filter2.attribute);
     }
@@ -96,11 +103,7 @@ public class Filter {
 
     private static String getAttributeFrom(String filter) {
         int endsAt = filter.indexOf(':');
-        if (endsAt > 0) {
-            return filter.substring(0, endsAt);
-        } else {
-            return filter;
-        }
+        return endsAt > 0 ? filter.substring(0, endsAt) : filter;
     }
 
     private static Inclusion getValueFrom(String inclusion) {
@@ -109,7 +112,7 @@ public class Filter {
         if (startsAt < 2) {
             return Inclusion.INC;
         }
-        int endsAt = result.indexOf("|");
+        int endsAt = result.indexOf('|');
         endsAt = endsAt > 0 ? endsAt : result.length();
         result = result.substring(startsAt, endsAt);
         return startsAt < endsAt ? Inclusion.get(result.charAt(0)) : Inclusion.INC;

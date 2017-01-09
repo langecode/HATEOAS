@@ -14,8 +14,8 @@ import io.swagger.annotations.ApiModelProperty;
  * Represents a single transaction in its default projection as returned by the REST service.
  */
 @Resource
-@ApiModel(value="Transaction",
-        description="An classical domain immutable transaction")
+@ApiModel(value = "Transaction",
+        description = "An classical domain immutable transaction")
 
 public class TransactionRepresentation {
     private String id;
@@ -48,6 +48,7 @@ public class TransactionRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "description",
+            example = "Starbucks Coffee",
             notes = "the human readable description of the transaction.",
             value = "Read-only")
     public String getDescription() {
@@ -57,6 +58,7 @@ public class TransactionRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "amount",
+            example = "123.45",
             notes = "the amount - in this example without currency.",
             value = "Read-only")
     public String getAmount() {

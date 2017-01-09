@@ -1,21 +1,26 @@
 package dk.nykredit.bank.account.model;
 
+import java.util.UUID;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import dk.nykredit.nic.persistence.jpa.AbstractAuditable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.*;
-import java.util.UUID;
-
 /**
- * Very basic modelling of an transaction concept to show the relation to account handled by JPA.
+ * Very basic modelling of an reconciled transaction concept to show the relation to account handled by JPA.
  */
 @Entity
 @Table(name = "BANK_RECONCILED_TX", uniqueConstraints = @UniqueConstraint(columnNames = { "FK_TRANSACTION_TID", "SID" }))
 public class ReconciledTransaction extends AbstractAuditable {
-    private static final String[] EXCLUDED_FIELDS = new String[]{
-        "tId", "lastModifiedBy", "lastModifiedTime"
-    };
 
     /**
      * TID - the technical unique identifier for instance, i.e., primary key. This should NEVER EVER be
@@ -31,9 +36,6 @@ public class ReconciledTransaction extends AbstractAuditable {
     @Column(name = "SID", length = 36, nullable = false, columnDefinition = "CHAR(36)")
     private String id;
 
-    /**
-     * The reconciled transaction "is linked to" a transaction.
-     */
     /**
      * The transaction is "owned" by account.
      */
@@ -85,11 +87,6 @@ public class ReconciledTransaction extends AbstractAuditable {
 
     public Transaction getTransaction() {
         return transaction;
-    }
-
-    @Override
-    protected String[] excludedFields() {
-        return EXCLUDED_FIELDS;
     }
 
     @Override

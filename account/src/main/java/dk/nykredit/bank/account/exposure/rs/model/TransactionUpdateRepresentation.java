@@ -1,16 +1,16 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
- * the necessary input for creation of a Transaction.
+ * The necessary input for creation of a Transaction.
  */
-@ApiModel(value="TransactionUpdate",
-        description="the input necessary for creating a transaction")
+@ApiModel(value = "TransactionUpdate",
+        description = "the input necessary for creating a transaction")
 public class TransactionUpdateRepresentation {
 
     @NotNull
@@ -25,6 +25,7 @@ public class TransactionUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "description",
+            example = "Starbucks Coffee",
             notes = "the human readable description of the transaction.",
             value = "Readable and Writeable")
     public String getDescription() {
@@ -34,6 +35,7 @@ public class TransactionUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "amount",
+            example = "123.45",
             notes = "the amount - in this example without currency.",
             value = "Readable and Writeable")
     public String getAmount() {

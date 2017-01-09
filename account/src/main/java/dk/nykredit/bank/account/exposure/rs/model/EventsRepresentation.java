@@ -1,5 +1,13 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.core.UriInfo;
+
 import dk.nykredit.bank.account.exposure.rs.EventServiceExposure;
 import dk.nykredit.bank.account.model.Event;
 import dk.nykredit.jackson.dataformat.hal.HALLink;
@@ -9,19 +17,12 @@ import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Represents a set of events as returned by the REST service in the default projection.
  */
 @Resource
-@ApiModel(value="Events",
-        description="A set of immutable events")
+@ApiModel(value = "Events",
+        description = "A set of immutable events")
 
 public class EventsRepresentation {
     @EmbeddedResource("events")

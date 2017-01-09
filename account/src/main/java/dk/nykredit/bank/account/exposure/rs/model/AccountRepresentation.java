@@ -23,8 +23,8 @@ import io.swagger.annotations.ApiModelProperty;
  * Represents a single Account as returned from REST service in the default projection.
  */
 @Resource
-@ApiModel(value="Account",
-        description="the Account")
+@ApiModel(value = "Account",
+        description = "the Account")
 public class AccountRepresentation {
     private String regNo;
     private String accountNo;
@@ -64,6 +64,7 @@ public class AccountRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "regno",
+            example = "1234",
             notes = "the registration number preceeding the account  number.",
             value = "Read-only")
     public String getRegNo() {
@@ -73,6 +74,7 @@ public class AccountRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "accountno",
+            example = "12345678",
             notes = "the account  number.",
             value = "Read-only")
     public String getAccountNo() {
@@ -82,6 +84,7 @@ public class AccountRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "name",
+            example = "NemKonto",
             notes = "the human readable name of the account.",
             value = "Readable and Writeable")
     public String getName() {

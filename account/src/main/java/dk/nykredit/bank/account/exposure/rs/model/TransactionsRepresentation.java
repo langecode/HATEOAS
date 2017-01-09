@@ -22,8 +22,8 @@ import io.swagger.annotations.ApiModelProperty;
  * Represents a set of transactions as returned by the REST service in the default projection.
  */
 @Resource
-@ApiModel(value="Transactions",
-        description="A set of immutable transactions")
+@ApiModel(value = "Transactions",
+        description = "A set of immutable transactions")
 
 public class TransactionsRepresentation {
     @EmbeddedResource("transactions")

@@ -1,15 +1,11 @@
 package dk.nykredit.api.capabilities;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 /**
- * a composition is used for signalling that a consumer of a given API resource
- * would like to have given concept included in a given projection.
+ * A composition signals that a consumer of a given API resource
+ * wants to have a given concept included in a projection.
  * <p>
  * Composition is about enabling the consumers of services, the Query Parameter
  * <code>embed</code> is used to signal to the service that the consumer would
@@ -58,13 +54,15 @@ public class Composition {
         return this.concept;
     }
 
-    String getProjection(){
+    String getProjection() {
         return this.projection;
     }
     /**
-     * delivers a set of Compositions back containing a number of attributes from the part that is within
+     * Signals to the server that a consumer would like a composition of objects in reponse.
+     *
+     * Delivers a set of Compositions back containing a number of attributes from the part that is within
      * the http:// ..../ some-resource?embed="value" that value may contain one or more concepts and projections
-     * which is part of the resource attributes for the endpoint that the request is targetting
+     * which is part of the resource attributes for the endpoint that the request is targeting
      * <p>
      * the format of the {@literal(select="value" is "concept::projection|otherconcept::thisprojection|..."</code>)}
      * and so on.
@@ -96,7 +94,7 @@ public class Composition {
 
     private static String getProjection(String compositionPair) {
         int startsAt = compositionPair.indexOf("::") + "::".length();
-        int endsAt = compositionPair.indexOf("|");
+        int endsAt = compositionPair.indexOf('|');
         return compositionPair.substring(startsAt, endsAt > 0 ? endsAt : compositionPair.length());
     }
 

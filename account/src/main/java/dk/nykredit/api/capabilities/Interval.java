@@ -1,16 +1,16 @@
 package dk.nykredit.api.capabilities;
 
-import dk.nykredit.time.CurrentTime;
-
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
+import dk.nykredit.time.CurrentTime;
+
 /**
- * an interval in time starting at a certain point in time and ends at another time.
- * the interval will always start before it ends. The start is exclusive and the end is inclusive.
+ * A time interval with a start and end time.
+ * The interval will always start before it ends. The start is exclusive and the end is inclusive.
  * <p>
  * Temporal aspects are handled using the interval Query Parameter.
  *
@@ -34,21 +34,19 @@ import java.util.StringTokenizer;
  * </code>
  *
  * <p>
- * The latter three returns the transactions from a specific account
- * within the last day assuming now is friday the.
- * 14th of October 2016 UTC
+ * The latter three return the transactions from a specific account
+ * within the last day assuming now is Friday the 14th of October 2016 UTC
  * </p>
- * This supports the use of CurrentTime and it virtual time set.
+ * This supports the use of CurrentTime and its virtual time set.
  */
-
 public class Interval {
 
+    private static final int DEFAULT_TIME_SPAN = 4;
     private final ZonedDateTime start;
     private final ZonedDateTime end;
 
     private Interval(ZonedDateTime start) {
-        this.start = start;
-        end = CurrentTime.now();
+        this(start, CurrentTime.now());
     }
 
     private Interval(ZonedDateTime start, ZonedDateTime end) {
@@ -73,7 +71,7 @@ public class Interval {
     }
 
     /**
-     * delivers an Interval back having a start and an end.
+     * Creates an Interval having a start and an end.
      *
      * The interval is constructed from a syntax like:
      *
@@ -100,10 +98,9 @@ public class Interval {
     }
 
     private static Optional<Interval> createValidInterval(StringTokenizer timePoints) {
-        ZonedDateTime zds;
         String startPoint = timePoints.nextToken();
         String start = getAttribute(startPoint);
-        zds = getZonedDateTime(startPoint, start, startPoint.contains("at::"));
+        ZonedDateTime zds = getZonedDateTime(startPoint, start, startPoint.contains("at::"));
         if (null == zds) {
             return Optional.empty();
         }
@@ -116,7 +113,7 @@ public class Interval {
             if (startPoint.contains("from::"))
                 return Optional.of(new Interval(zds, CurrentTime.now()));
             if (startPoint.contains("at::"))
-                return Optional.of(new Interval(zds, zds.plusHours(4)));
+                return Optional.of(new Interval(zds, zds.plusHours(DEFAULT_TIME_SPAN)));
         }
         return Optional.empty();
     }
@@ -171,7 +168,6 @@ public class Interval {
             if (time.contains("now")) {
                 zd = CurrentTime.now();
             }
-
             if (time.contains("tomorrow")) {
                 zd = CurrentTime.now().plusDays(1);
             }
@@ -184,7 +180,7 @@ public class Interval {
 
     private static String getValue(String timePoint) {
         int startsAt = timePoint.indexOf("::") + "::".length();
-        int endsAt = timePoint.indexOf("|") > 0 ? timePoint.indexOf("|") : timePoint.length();
+        int endsAt = timePoint.indexOf('|') > 0 ? timePoint.indexOf('|') : timePoint.length();
         return timePoint.substring(startsAt, endsAt);
 
     }

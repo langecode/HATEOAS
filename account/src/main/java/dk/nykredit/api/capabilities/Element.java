@@ -3,7 +3,8 @@ package dk.nykredit.api.capabilities;
 import java.util.Optional;
 
 /**
- * Pagination of responses is obtained by using the Query parameter `elements`.
+ * Defines a pagination of responses is obtained by using the Query parameter `elements`.
+ *
  * The Query Parameter `elements` signals the initial element and the last element that is desired to be part of the response.
  *
  * <p>
@@ -19,6 +20,8 @@ import java.util.Optional;
  * A maximum element size is defined here max size is 500 elements
  */
 public class Element {
+
+    public static final int MAX_ELEMENTS = 500;
 
     private final int start;
     private final int end;
@@ -43,8 +46,8 @@ public class Element {
     }
 
     /**
-     * delivers a span of elements that is desired back as part of a response
-     * the syntax supported is given by the regexp: <code>"^([0-9]+)?(\\|[0-9]+)?"</code>
+     * A span of elements.
+     * The syntax supported is given by the regexp: <code>"^([0-9]+)?(\\|[0-9]+)?"</code>
      * @param element a string that follows the syntax given by the regexp above
      * @return an element set with a "include from element (start)" to "last included element (end)"
      */
@@ -60,8 +63,8 @@ public class Element {
         if (pipe > 0) {
             try {
                 int s = Integer.parseInt(result.substring(0, pipe));
-                int e = Integer.parseInt(result.substring(pipe + 1, result.length()));
-                if (( e > s) && (s > 0) && (e-s < 500)) {
+                int e = Integer.parseInt(result.substring(pipe + 1));
+                if ((e > s) && (s > 0) && (e-s < MAX_ELEMENTS)) {
                     return Optional.of(new Element(s, e));
                 }
             } catch (NumberFormatException e) {

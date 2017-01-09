@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parser to be used to parse capabilities.
- * @param <C> The capability handlesd by parser instance
+ * @param <C> The capability handled by parser instance
  */
 public class CapabilityParser<C> {
     private final Pattern pattern;

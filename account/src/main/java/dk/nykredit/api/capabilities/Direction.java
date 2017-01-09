@@ -1,10 +1,8 @@
 package dk.nykredit.api.capabilities;
 
 /**
- * signals whether a sorting criteria for a given attribute is sorted
- * ascending or descending of a an attribute.
+ * Sorting direction for a given attribute used in conjunction with Sort.
  */
-
 public enum Direction {
     ASC('+'), DESC('-');
 
@@ -15,8 +13,6 @@ public enum Direction {
     }
 
     static Direction get(char e) {
-        if('-'==e) return DESC;
-        if(' '==e) return ASC;
-        return ASC;
+        return '-' == e ? DESC : ASC;
     }
 }

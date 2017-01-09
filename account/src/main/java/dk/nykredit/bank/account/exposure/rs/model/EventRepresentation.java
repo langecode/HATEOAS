@@ -1,5 +1,7 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
+import javax.ws.rs.core.UriInfo;
+
 import dk.nykredit.bank.account.exposure.rs.EventServiceExposure;
 import dk.nykredit.bank.account.model.Event;
 import dk.nykredit.jackson.dataformat.hal.HALLink;
@@ -8,14 +10,12 @@ import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.ws.rs.core.UriInfo;
-
 /**
  * Represents a single transaction in its default projection as returned by the REST service.
  */
 @Resource
-@ApiModel(value="Transaction",
-        description="An immutable event")
+@ApiModel(value = "Event",
+        description = "An immutable event")
 
 public class EventRepresentation {
     private String id;
@@ -29,6 +29,8 @@ public class EventRepresentation {
     @Link
     private HALLink origin;
 
+    @Link
+    private HALLink metadata;
 
     public EventRepresentation(Event event, UriInfo uriInfo) {
         this.id = event.getId();
@@ -42,6 +44,13 @@ public class EventRepresentation {
         this.origin = new HALLink.Builder(uriInfo.getBaseUriBuilder()
                 .path(event.getOrigin() != null ? event.getOrigin().getPath() : "no path")
                 .build())
+                .build();
+        this.metadata = new HALLink.Builder(uriInfo.getBaseUriBuilder()
+                .path(EventServiceExposure.class)
+                .build())
+                .name("eventMetadata")
+                .title("Metadata for Event Resource")
+                .type("application/hal+json;concept=metadata")
                 .build();
     }
 
@@ -66,6 +75,7 @@ public class EventRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "sequence",
+            example = "1",
             notes = "the sequence - in this example to show that time and sequence can be used for idempotency.",
             value = "Readable and Writeable")
     public String getSequence() {
@@ -75,6 +85,7 @@ public class EventRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "category",
+            example = "1234-12345678",
             notes = "the category - in which the event has been grouped into. Default is (default) if no category has been set.",
             value = "Readable and Writeable")
     public String getCategory() {
@@ -95,6 +106,14 @@ public class EventRepresentation {
             notes = "link to the event itself.")
     public HALLink getSelf() {
         return self;
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "metadata",
+            notes = "link to the event metadata.")
+    public HALLink getMetadata() {
+        return metadata;
     }
 
 }

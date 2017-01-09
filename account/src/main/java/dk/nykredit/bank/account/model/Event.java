@@ -1,11 +1,5 @@
 package dk.nykredit.bank.account.model;
 
-import dk.nykredit.nic.persistence.jpa.AbstractAuditable;
-import dk.nykredit.time.CurrentTime;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import javax.persistence.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
@@ -14,25 +8,29 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import javax.persistence.*;
+
+import dk.nykredit.nic.persistence.jpa.AbstractAuditable;
+import dk.nykredit.time.CurrentTime;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 /**
  * Very basic modelling of an event concept to show the relation to account handled by JPA.
  *
- * The Event is shown her with a sequence and it uses the database for that, this is not recommended in
- * a cloud capable setup as this will not work in a truly distributed setup. In such as scenario it is better
- * to use som form of consensus algorithm to state what is before what in order to create a sequence.
+ * The Event is shown here with a sequence and it uses the database for that, this is not recommended in
+ * a cloud capable setup as this will not work in a truly distributed setup. In such a scenario it is better
+ * to use some form of consensus algorithm to state what is before what in order to create a sequence.
  * An even better way is to use a dedicated feed reader status per endpoint and what endpoints are redundant
  * and in that know how far the feed reading is (behind or at target).
  *
- * The Events her is said to be auditable, but in reality this may not be the case always as not all events will
+ * The Event here is said to be auditable, but in reality this may not be the case always as not all events will
  * have to be auditable but events that e.g. includes events around accounts may have that requirement.
  */
 @Entity
-@SequenceGenerator (name="sequencer", initialValue=1, allocationSize=100)
+@SequenceGenerator(name = "sequencer", initialValue = 1, allocationSize = 100)
 @Table(name = "ACCOUNT_EVENT", uniqueConstraints = @UniqueConstraint(columnNames = {"SID", "SEQ", "TIME"}))
 public class Event extends AbstractAuditable {
-    private static final String[] EXCLUDED_FIELDS = new String[]{
-            "tId", "lastModifiedBy", "lastModifiedTime"
-    };
 
     /**
      * TID - the technical unique identifier for instance, i.e., primary key. This should NEVER EVER be
@@ -43,7 +41,7 @@ public class Event extends AbstractAuditable {
     private String tId;
 
     /**
-     * Semantic key of a event which is exposed as key to the outside world!
+     * Semantic key of a event which is exposed as key to the outside world
      */
     @Column(name = "SID", length = 36, nullable = false, columnDefinition = "CHAR(36)")
     private String id;
@@ -119,7 +117,6 @@ public class Event extends AbstractAuditable {
         }
     }
 
-
     public String getId() {
         return id;
     }
@@ -153,11 +150,6 @@ public class Event extends AbstractAuditable {
 
     public String getCategory() {
         return category;
-    }
-
-    @Override
-    protected String[] excludedFields() {
-        return EXCLUDED_FIELDS;
     }
 
     @Override

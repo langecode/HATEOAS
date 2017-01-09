@@ -1,17 +1,18 @@
 package dk.nykredit.api.capabilities;
 
 /**
- * API input sanitizer rudimental version
- *
+ * API input sanitizer in a rudimental version.
  */
-
-
 class Sanitizer {
-    private static final String[] SUSPICIOUS_CONTENT = {"\'","\"","\\","%","\\%","\\_","\0","\b","\n","\t","\r","\\Z","?","#"};
+    private static final String[] SUSPICIOUS_CONTENT = {"\'", "\"", "\\", "%", "\\%", "\\_", "\0", "\b", "\n", "\t", "\r", "\\Z", "?", "#"};
+
+    private Sanitizer(){
+        // reduce scope to avoid default construction
+    }
 
     /**
-     *  a simple sanitizer that needs to be extended and elaborated to cope with injections and
-     *  other things that poses as threats to the services and the data they contains and maintain.
+     * A simple sanitizer that needs to be extended and elaborated to cope with injections and
+     * other things that pose as threats to the services and the data they contain and maintain.
      *
      * @param input an input string received from a non-trustworthy source (in reality every source)
      * @param allowSpaces should the string be stripped for spaces or allow these to stay
@@ -23,8 +24,8 @@ class Sanitizer {
         if (null == input) {
             return "";
         }
-        if (!allowSpaces){
-           result = result.replaceAll(" ", "");
+        if (!allowSpaces) {
+            result = result.replaceAll(" ", "");
         }
         if (!allowNumbers) {
             result = result.matches(".*\\d.*") ? "" : result;

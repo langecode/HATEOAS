@@ -1,9 +1,9 @@
 package dk.nykredit.api.capabilities;
 
 /**
- * signals whether a criteria for a given API capability is used
- * for inclusion or exclusion of a an attribute when filtering the
- * desired response. This is used for dynamic projections.
+ * Signals inclusion or exclusion of a given criterion used in conjunction with Composition.
+ *
+ * This is used for dynamic projections.
  */
 public enum Inclusion {
     INC('+'), EXC('-');
@@ -15,7 +15,6 @@ public enum Inclusion {
     }
 
     public static Inclusion get(char c) {
-        if('-'==c) return EXC;
-        return INC;
+        return '-' == c ? EXC : INC;
     }
 }

@@ -1,16 +1,16 @@
 package dk.nykredit.bank.account.exposure.rs.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
- * the necessary input for creation of an Account and used for updating an Account.
+ * The necessary input for creation of an Account and used for updating an Account.
  */
-@ApiModel(value="AccountUpdate",
-        description="the inout necessary for creating an Account")
+@ApiModel(value = "AccountUpdate",
+        description = "the inout necessary for creating an Account")
 
 public class AccountUpdateRepresentation {
 
@@ -27,6 +27,7 @@ public class AccountUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "regno",
+            example = "1234",
             notes = "the registration number preceeding the account  number.",
             value = "Read-only")
     public String getRegNo() {
@@ -36,6 +37,7 @@ public class AccountUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "accountno",
+            example = "12345678",
             notes = "the account  number.",
             value = "Read-only")
     public String getAccountNo() {
@@ -45,6 +47,7 @@ public class AccountUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "name",
+            example = "NemKonto",
             notes = "the human readable name of the account.",
             value = "Readable and Writeable")
     public String getName() {
