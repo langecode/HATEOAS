@@ -23,22 +23,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-        <!-- dependency>
-            <groupId>dk.nykredit.nic</groupId>
-            <artifactId>nic-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dk.nykredit.nic</groupId>
-            <artifactId>nic-persistence</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dk.nykredit.nic</groupId>
-            <artifactId>nic-rs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dk.nykredit.nic</groupId>
-            <artifactId>nic-rs-client</artifactId>
-        </dependency -->
+
         <dependency>
             <groupId>dk.nykredit.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-hal</artifactId>
@@ -94,11 +79,6 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- dependency>
-            <groupId>dk.nykredit.nic</groupId>
-            <artifactId>nic-test</artifactId>
-            <scope>test</scope>
-        </dependency -->
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -115,11 +95,7 @@
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- dependency>
-            <groupId>dk.nykredit.nic</groupId>
-            <artifactId>nic-system</artifactId>
-            <scope>provided</scope>
-        </dependency -->
+
     </dependencies>
 
 </project>

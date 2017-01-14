@@ -3,7 +3,7 @@ package dk.nykredit.api.capabilities;
 /**
  * API input sanitizer in a rudimental version.
  */
-class Sanitizer {
+public class Sanitizer {
     private static final String[] SUSPICIOUS_CONTENT = {"\'", "\"", "\\", "%", "\\%", "\\_", "\0", "\b", "\n", "\t", "\r", "\\Z", "?", "#"};
 
     private Sanitizer(){

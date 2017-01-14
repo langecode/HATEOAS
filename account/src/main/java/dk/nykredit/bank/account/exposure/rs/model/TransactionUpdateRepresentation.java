@@ -25,6 +25,7 @@ public class TransactionUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "description",
+            required = true,
             example = "Starbucks Coffee",
             notes = "the human readable description of the transaction.",
             value = "Readable and Writeable")
@@ -35,6 +36,7 @@ public class TransactionUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "amount",
+            required = true,
             example = "123.45",
             notes = "the amount - in this example without currency.",
             value = "Readable and Writeable")

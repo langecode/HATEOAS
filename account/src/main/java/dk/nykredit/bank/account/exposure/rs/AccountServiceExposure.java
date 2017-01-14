@@ -137,7 +137,7 @@ public class AccountServiceExposure {
     })
     public Response createOrUpdate(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
                                    @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
-                                   @Valid AccountUpdateRepresentation account,
+                                   @ApiParam(value = "account") @Valid AccountUpdateRepresentation account,
                                    @Context UriInfo uriInfo, @Context Request request) {
         if (!regNo.equals(account.getRegNo()) || !accountNo.equals(account.getAccountNo())) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);

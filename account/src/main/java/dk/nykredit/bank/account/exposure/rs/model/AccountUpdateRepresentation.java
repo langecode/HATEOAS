@@ -27,6 +27,7 @@ public class AccountUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "regno",
+            required = true,
             example = "1234",
             notes = "the registration number preceeding the account  number.",
             value = "Read-only")
@@ -37,6 +38,7 @@ public class AccountUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "accountno",
+            required = true,
             example = "12345678",
             notes = "the account  number.",
             value = "Read-only")
@@ -47,6 +49,7 @@ public class AccountUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "name",
+            required = true,
             example = "NemKonto",
             notes = "the human readable name of the account.",
             value = "Readable and Writeable")

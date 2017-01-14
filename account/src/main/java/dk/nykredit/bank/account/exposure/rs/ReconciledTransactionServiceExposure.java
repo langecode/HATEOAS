@@ -17,7 +17,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import dk.nykredit.api.capabilities.Sanitizer;
 import dk.nykredit.bank.account.exposure.rs.model.ReconciledTransactionRepresentation;
+import dk.nykredit.bank.account.exposure.rs.model.ReconciledTransactionUpdateRepresentation;
 import dk.nykredit.bank.account.exposure.rs.model.ReconciledTransactionsRepresentation;
 import dk.nykredit.bank.account.model.Account;
 import dk.nykredit.bank.account.model.ReconciledTransaction;
@@ -97,22 +99,21 @@ public class ReconciledTransactionServiceExposure {
             nickname = "updateReconciledTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "No updating possible", response = ErrorRepresentation.class)
-        })
+    })
     public Response createOrUpdate(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
                                    @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
                                    @PathParam("id") String id,
-                                   @Valid ReconciledTransactionRepresentation rtx,
+                                   @ApiParam(value = "reconciled transaction") @Valid ReconciledTransactionUpdateRepresentation rtx,
                                    @Context UriInfo uriInfo, @Context Request request) {
 
-        if (!defined(rtx.getId())) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-        Transaction tx = archivist.findTransaction(regNo, accountNo, rtx.getId());
+
+        String txId = Sanitizer.sanitize(id, false, true);
+        Transaction tx = archivist.findTransaction(regNo, accountNo, txId);
         if (!defined(tx)) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        ReconciledTransaction reconciled = new ReconciledTransaction(rtx.getReconciled(), rtx.getNote(), tx);
+        ReconciledTransaction reconciled = new ReconciledTransaction(rtx.getReconciled().contains("true"), rtx.getNote(), tx);
         archivist.save(reconciled);
         return new EntityResponseBuilder<>(reconciled.getTransaction(), t -> new ReconciledTransactionRepresentation(reconciled, t, uriInfo))
                     .name(CONCEPT_NAME)
@@ -154,13 +155,6 @@ public class ReconciledTransactionServiceExposure {
                 .name(CONCEPT_NAME)
                 .version(CONCEPT_VERSION)
                 .build(request);
-    }
-
-    private boolean defined(String id) {
-        if ((null == id) || ("".equals(id.trim()))) {
-            return false;
-        }
-        return true;
     }
 
     private boolean defined(Transaction tx) {

@@ -113,10 +113,11 @@ public class TransactionServiceExposure {
             nickname = "setTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Could create the new transaction", response = ErrorRepresentation.class),
-            @ApiResponse(code = 201, message = "New transaction created.", response = TransactionRepresentation.class)
+            @ApiResponse(code = 201, message = "New transaction created.", response = TransactionRepresentation.class),
+            @ApiResponse(code = 202, message = "The input has been accepted and a new transaction will most likely be created.")
     })
     public Response set(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo, @PathParam("id") String id,
-                        @Valid TransactionUpdateRepresentation tx,
+                        @ApiParam(value = "transaction") @Valid TransactionUpdateRepresentation tx,
                         @Context UriInfo uriInfo, @Context Request request) {
 
         Optional<Account> acc = archivist.findAccount(regNo, accountNo);
