@@ -48,7 +48,7 @@
       "get" : {
         "tags" : [ "interval", "events" ],
         "summary" : "obtain all events emitted by the account-event service",
-        "description" : " the events are signalled by this resource as this this is the authoritative resource for all events that subscribers to the aoount service should be able to listen for and react to. In other words this is the authoritativefeed for the account service",
+        "description" : " the events are signalled by this resource as this this is the authoritative resource for all events that subscribers to the account service should be able to listen for and react to. In other words this is the authoritativefeed for the account service",
         "operationId" : "listAllEvents",
         "produces" : [ "application/hal+json" ],
         "parameters" : [ {
@@ -64,13 +64,18 @@
               "$ref" : "#/definitions/Events"
             }
           }
-        }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        }, {
+          "oauth" : [ ]
+        } ]
       }
     },
     "/account-events/{category}" : {
       "get" : {
         "tags" : [ "interval", "events" ],
-        "summary" : "obtain all events emitted by the account-event service scoped to a certain category",
+        "summary" : "obtain all events scoped to a certain category",
         "description" : " the events are signalled by this resource as this this is the authoritative resource for all events that subscribers to the account service should be able to listen for and react to. In other words this is the authoritativefeed for the account service, allowing for subscribers to have these grouped into categories",
         "operationId" : "getEventsByCategory",
         "produces" : [ "application/hal+json" ],
@@ -92,7 +97,12 @@
               "$ref" : "#/definitions/Events"
             }
           }
-        }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        }, {
+          "oauth" : [ ]
+        } ]
       }
     },
     "/account-events/{category}/{id}" : {
@@ -117,13 +127,18 @@
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "$ref" : "#/definitions/Transaction"
+              "$ref" : "#/definitions/Event"
             }
           },
           "404" : {
             "description" : "No event found."
           }
-        }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        }, {
+          "oauth" : [ ]
+        } ]
       }
     },
     "/accounts" : {
@@ -140,7 +155,10 @@
               "$ref" : "#/definitions/Accounts"
             }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "advisor" ]
+        } ]
       }
     },
     "/accounts/{regNo}-{accountNo}" : {
@@ -171,7 +189,10 @@
           "404" : {
             "description" : "No account found."
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "customer", "advisor" ]
+        } ]
       },
       "put" : {
         "tags" : [ "accounts" ],
@@ -190,6 +211,14 @@
           "in" : "path",
           "required" : true,
           "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "account",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/AccountUpdate"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -199,12 +228,21 @@
             }
           },
           "201" : {
-            "description" : "New Account Created"
+            "description" : "New Account Created",
+            "schema" : {
+              "$ref" : "#/definitions/Account"
+            }
           },
           "400" : {
-            "description" : "Could not update or create the account"
+            "description" : "Could not update or create the account",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "customer", "system", "advisor" ]
+        } ]
       }
     },
     "/accounts/{regNo}-{accountNo}/reconciled-transactions" : {
@@ -232,7 +270,10 @@
               "$ref" : "#/definitions/ReconciledTransactions"
             }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "customer", "advisor" ]
+        } ]
       }
     },
     "/accounts/{regNo}-{accountNo}/reconciled-transactions/{id}" : {
@@ -268,7 +309,10 @@
           "404" : {
             "description" : "No reconciled transaction found."
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "customer" ]
+        } ]
       },
       "put" : {
         "tags" : [ "decorator", "reconciled" ],
@@ -292,6 +336,14 @@
           "in" : "path",
           "required" : true,
           "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "reconciled transaction",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/ReconciledtransactionUpdate"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -301,9 +353,15 @@
             }
           },
           "400" : {
-            "description" : "No updating possible"
+            "description" : "No updating possible",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "system" ]
+        } ]
       }
     },
     "/accounts/{regNo}-{accountNo}/transactions" : {
@@ -346,7 +404,10 @@
               "$ref" : "#/definitions/Transactions"
             }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "customer", "advisor" ]
+        } ]
       }
     },
     "/accounts/{regNo}-{accountNo}/transactions/{id}" : {
@@ -382,7 +443,10 @@
           "404" : {
             "description" : "No transaction found."
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "customer", "advisor" ]
+        } ]
       },
       "put" : {
         "tags" : [ "immutable", "transactions" ],
@@ -406,6 +470,14 @@
           "in" : "path",
           "required" : true,
           "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "transaction",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/TransactionUpdate"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -415,12 +487,41 @@
             }
           },
           "201" : {
-            "description" : "New transaction created."
+            "description" : "New transaction created.",
+            "schema" : {
+              "$ref" : "#/definitions/Transaction"
+            }
+          },
+          "202" : {
+            "description" : "The input has been accepted and a new transaction will most likely be created."
           },
           "400" : {
-            "description" : "Could create the new transaction"
+            "description" : "Could create the new transaction",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "system" ]
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "Bearer" : {
+      "type" : "apiKey",
+      "name" : "Authorization: Bearer",
+      "in" : "header"
+    },
+    "oauth" : {
+      "type" : "oauth2",
+      "authorizationUrl" : "https://banking.services.sample-bank.dk/token.oauth2?grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=JWT",
+      "flow" : "implicit",
+      "scopes" : {
+        "customer" : "get access to own account",
+        "system" : "create account events and transactions",
+        "advisor" : "get access on a owner's behalf"
       }
     }
   },
@@ -430,14 +531,17 @@
       "properties" : {
         "regno" : {
           "type" : "string",
+          "example" : 1234,
           "description" : "Read-only"
         },
         "accountno" : {
           "type" : "string",
+          "example" : 12345678,
           "description" : "Read-only"
         },
         "name" : {
           "type" : "string",
+          "example" : NemKonto,
           "description" : "Readable and Writeable"
         },
         "_links" : {
@@ -453,6 +557,31 @@
         }
       },
       "description" : "the Account"
+    },
+    "AccountUpdate" : {
+      "type" : "object",
+      "required" : [ "accountno", "name", "regno" ],
+      "properties" : {
+        "regno" : {
+          "type" : "string",
+          "example" : 1234,
+          "description" : "Read-only",
+          "pattern" : "^[0-9]{4}$"
+        },
+        "accountno" : {
+          "type" : "string",
+          "example" : 12345678,
+          "description" : "Read-only",
+          "pattern" : "^[0-9]+$"
+        },
+        "name" : {
+          "type" : "string",
+          "example" : NemKonto,
+          "description" : "Readable and Writeable",
+          "pattern" : ".{1,40}"
+        }
+      },
+      "description" : "the inout necessary for creating an Account"
     },
     "Accounts" : {
       "type" : "object",
@@ -479,6 +608,74 @@
       },
       "description" : "a list of Accounts in default projection"
     },
+    "Error" : {
+      "type" : "object",
+      "properties" : {
+        "sid" : {
+          "type" : "string",
+          "description" : "Read-only"
+        },
+        "message" : {
+          "type" : "string",
+          "example" : this error happened due to this situation,
+          "description" : "Read-only"
+        },
+        "_links" : {
+          "type" : "object",
+          "properties" : {
+            "resource" : {
+              "$ref" : "#/definitions/HALLink"
+            },
+            "values" : {
+              "type" : "object",
+              "description" : "Read-only",
+              "additionalProperties" : {
+                "type" : "object"
+              }
+            }
+          }
+        }
+      },
+      "description" : "a simple error representation"
+    },
+    "Event" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Readable and Writeable"
+        },
+        "time" : {
+          "type" : "string",
+          "description" : "Readable and Writeable"
+        },
+        "sequence" : {
+          "type" : "string",
+          "example" : 1,
+          "description" : "Readable and Writeable"
+        },
+        "category" : {
+          "type" : "string",
+          "example" : 1234-12345678,
+          "description" : "Readable and Writeable"
+        },
+        "_links" : {
+          "type" : "object",
+          "properties" : {
+            "metadata" : {
+              "$ref" : "#/definitions/HALLink"
+            },
+            "origin" : {
+              "$ref" : "#/definitions/HALLink"
+            },
+            "self" : {
+              "$ref" : "#/definitions/HALLink"
+            }
+          }
+        }
+      },
+      "description" : "An immutable event"
+    },
     "Events" : {
       "type" : "object",
       "properties" : {
@@ -488,7 +685,7 @@
             "events" : {
               "type" : "array",
               "items" : {
-                "$ref" : "#/definitions/Transaction"
+                "$ref" : "#/definitions/Event"
               }
             }
           }
@@ -628,6 +825,23 @@
       },
       "description" : "A mutable decorator for a transaction to keep its immutability"
     },
+    "ReconciledtransactionUpdate" : {
+      "type" : "object",
+      "required" : [ "note", "reconciled" ],
+      "properties" : {
+        "note" : {
+          "type" : "string",
+          "description" : "Read-only",
+          "pattern" : ".{1,256}"
+        },
+        "reconciled" : {
+          "type" : "string",
+          "description" : "Read-only",
+          "pattern" : "true|false"
+        }
+      },
+      "description" : "A way to reconcile transactions"
+    },
     "Transaction" : {
       "type" : "object",
       "properties" : {
@@ -637,10 +851,12 @@
         },
         "description" : {
           "type" : "string",
+          "example" : Starbucks Coffee,
           "description" : "Read-only"
         },
         "amount" : {
           "type" : "string",
+          "example" : 123.45,
           "description" : "Read-only"
         },
         "_links" : {
@@ -653,6 +869,25 @@
         }
       },
       "description" : "An classical domain immutable transaction"
+    },
+    "TransactionUpdate" : {
+      "type" : "object",
+      "required" : [ "amount", "description" ],
+      "properties" : {
+        "description" : {
+          "type" : "string",
+          "example" : Starbucks Coffee,
+          "description" : "Readable and Writeable",
+          "pattern" : ".{1,256}"
+        },
+        "amount" : {
+          "type" : "string",
+          "example" : 123.45,
+          "description" : "Readable and Writeable",
+          "pattern" : "^([0-9]{1,9})((\\.)([0-9]{2}))?"
+        }
+      },
+      "description" : "the input necessary for creating a transaction"
     },
     "Transactions" : {
       "type" : "object",
