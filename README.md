@@ -156,6 +156,13 @@ needs a bit of configuration
 An OAuth2 compliant endpoint is necessary (not included due to commercial right issues), which means the integration
 tests running in AccountServiceExposureIT requiring security will not run.
 
+About This Branch
+------------------
+The code have been added a way to handle the content-type based routing itself and thus let client be able to store
+one and on one version of the content-type inclusing it parameters. That means the clients must not understand anything
+else that "what version worked for me" and it a new version is added to the endpoint, which I as a client do not 
+understand i can take the one I saves and put that into the Accept header and the client will work again and the error 
+can be fixed without loss of operation. 
 
 Useful Commands
 ---------------
