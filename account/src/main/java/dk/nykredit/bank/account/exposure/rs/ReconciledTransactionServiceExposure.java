@@ -1,11 +1,14 @@
 package dk.nykredit.bank.account.exposure.rs;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,7 +31,14 @@ import dk.nykredit.bank.account.persistence.AccountArchivist;
 import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.nic.rs.EntityResponseBuilder;
 import dk.nykredit.nic.rs.error.ErrorRepresentation;
-import io.swagger.annotations.*;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * REST service exposing the Reconciled transactions
@@ -43,15 +53,23 @@ import io.swagger.annotations.*;
 @Api(value = "/accounts/{regNo}-{accountNo}/reconciled-transactions",
      tags = {"decorator", "reconciled"})
 public class ReconciledTransactionServiceExposure {
-    private static final String CONCEPT_NAME = "reconciled-transaction";
-    private static final String CONCEPT_VERSION = "1.0.0";
+    private final Map<String, ReconciledTransactionsProducerMethod> reconciledTxsProducers = new HashMap<>();
+    private final Map<String, ReconciledTransactionProducerMethod> reconciledTxProducers = new HashMap<>();
+
 
     @EJB
     private AccountArchivist archivist;
 
+    public ReconciledTransactionServiceExposure() {
+        reconciledTxsProducers.put("application/hal+json", this::listReconciledTransactionsSG1V1);
+        reconciledTxsProducers.put("application/hal+json;concept=reconciledtransactions;v=1", this::listReconciledTransactionsSG1V1);
+
+        reconciledTxProducers.put("application/hal+json", this::getReconciledSG1V1);
+        reconciledTxProducers.put("application/hal+json;concept=reconciledtransaction;v=1", this::getReconciledSG1V1);
+    }
 
     @GET
-    @Produces({ "application/hal+json" })
+    @Produces({ "application/hal+json", "application/hal+json;concept=reconciledtransactions;v=1"})
     @ApiOperation(value = "obtain reconciled transactions (added API capabilities not though not implemented)",
             response = ReconciledTransactionsRepresentation.class,
             authorizations = {@Authorization(value = "oauth", scopes = {
@@ -64,27 +82,28 @@ public class ReconciledTransactionServiceExposure {
             "such as - Yes I have verified that this transaction was correct and thus it is reconciled",
             produces = "application/hal+json, application/hal+json;concept=reconciledtransactions;v=1",
             nickname = "listReconciledTransactions")
-    public Response list(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
+    public Response list(@HeaderParam("Accept") String accept, @PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
                          @Context UriInfo uriInfo, @Context Request request) {
-        return listReconciledTransactionsSG1V1(regNo, accountNo, uriInfo, request);
+        return reconciledTxsProducers.get(accept).getResponse(regNo, accountNo, uriInfo, request);
     }
 
     @GET
     @Path("{id}")
-    @Produces({ "application/hal+json" })
+    @Produces({ "application/hal+json", "application/hal+json;concept=reconciledtransaction;v=1" })
     @LogDuration(limit = 50)
     @ApiOperation(value = "obtain a single reconciled transaction from a given account", response = ReconciledTransactionRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "customer", description = "allows getting own account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "customer", description = "allows getting own account")})
             },
             produces = "application/hal+json, application/hal+json;concept=reconciledtransaction;v=1",
             nickname = "getReconciledTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No reconciled transaction found.")
         })
-    public Response get(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo, @PathParam("id") String id,
+    public Response get(@HeaderParam("Accept") String accept, @PathParam("regNo") String regNo,
+                        @PathParam("accountNo") String accountNo, @PathParam("id") String id,
                         @Context UriInfo uriInfo, @Context Request request) {
-        return getReconciledSG1V1(regNo, accountNo, id, uriInfo, request);
+        return reconciledTxProducers.get(accept).getResponse(regNo, accountNo, id, uriInfo, request);
     }
 
     @PUT
@@ -123,11 +142,8 @@ public class ReconciledTransactionServiceExposure {
                 .build(request);
     }
 
-    @GET
-    @Produces({"application/hal+json;concept=reconciledtransactionoverview;v=1", "application/hal+json+reconciledtransactionoverview+1" })
     @LogDuration(limit = 50)
-    public Response listReconciledTransactionsSG1V1(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
-                                          @Context UriInfo uriInfo, @Context Request request) {
+    public Response listReconciledTransactionsSG1V1(String regNo, String accountNo, UriInfo uriInfo, Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
         return new EntityResponseBuilder<>(account.getReconciledTransactions(),
             transactions -> new ReconciledTransactionsRepresentation(account, uriInfo))
@@ -137,20 +153,8 @@ public class ReconciledTransactionServiceExposure {
             .build(request);
     }
 
-    @GET
-    @Path("{id}")
-    @Produces({"application/hal+json;concept=reconciledtransaction;v=1", "application/hal+json+reconciledtransaction+1" })
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=ReconciledTransaction;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+reconciledtransaction+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=ReconciledTransaction;v=1.0.0"
-     */
-    public Response getReconciledSG1V1(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo, @PathParam("id") String id,
-                             @Context UriInfo uriInfo, @Context Request request) {
+    public Response getReconciledSG1V1(String regNo, String accountNo, String id, UriInfo uriInfo, Request request) {
         ReconciledTransaction reconciledTransaction = archivist.getReconciledTransaction(regNo, accountNo, id);
         return new EntityResponseBuilder<>(reconciledTransaction,
             rt -> new ReconciledTransactionRepresentation(rt, rt.getTransaction(), uriInfo))
@@ -163,4 +167,15 @@ public class ReconciledTransactionServiceExposure {
     private boolean defined(Transaction tx) {
         return tx != null;
     }
+
+    interface ReconciledTransactionsProducerMethod {
+        Response getResponse(String regNo, String accountNo,
+                             UriInfo uriInfo, Request request);
+    }
+
+    interface ReconciledTransactionProducerMethod {
+        Response getResponse(String regNo, String accountNo, String id,
+                             UriInfo uriInfo, Request request);
+    }
+
 }

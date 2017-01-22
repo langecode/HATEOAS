@@ -51,7 +51,7 @@ public class ReconciledTransactionServiceExposureTest {
                 .thenReturn(new HashSet<>(Collections.singletonList(rtx)));
         when(archivist.getAccount("5479", "123456")).thenReturn(account);
 
-        Response response = service.list("5479", "123456", ui, request);
+        Response response = service.list("application/hal+json","5479", "123456", ui, request);
         ReconciledTransactionsRepresentation reconciledTxs = (ReconciledTransactionsRepresentation) response.getEntity();
 
         assertEquals(1, reconciledTxs.getReconciledTransactions().size());
@@ -73,7 +73,7 @@ public class ReconciledTransactionServiceExposureTest {
         ReconciledTransaction rtx = new ReconciledTransaction(true, "mocked decorated transaction", tx);
         when(archivist.getReconciledTransaction("5479", "123456", "xxx-yyy")).thenReturn(rtx);
 
-        Response response = service.get("5479", "123456", "xxx-yyy", ui, request);
+        Response response = service.get("application/hal+json","5479", "123456", "xxx-yyy", ui, request);
         ReconciledTransactionRepresentation reconciledTx = (ReconciledTransactionRepresentation) response.getEntity();
 
         assertEquals("mocked decorated transaction", reconciledTx.getNote());

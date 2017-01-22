@@ -46,7 +46,7 @@ public class AccountServiceExposureTest {
         when(archivist.listAccounts())
             .thenReturn(Arrays.asList(new Account("5479", "1", "Checking account"), new Account("5479", "2", "Savings account")));
 
-        Response response = service.list(ui, request);
+        Response response = service.list("application/hal+json",ui, request);
         AccountsRepresentation accounts = (AccountsRepresentation) response.getEntity();
 
         assertEquals(2, accounts.getAccounts().size());
@@ -62,7 +62,7 @@ public class AccountServiceExposureTest {
 
         when(archivist.getAccount("5479", "1234")).thenReturn(new Account("5479", "1234", "Savings account"));
 
-        AccountRepresentation account = (AccountRepresentation) service.get("5479", "1234", ui, request).getEntity();
+        AccountRepresentation account = (AccountRepresentation) service.get("5479", "1234", "application/hal+json", ui, request).getEntity();
 
         assertEquals("5479", account.getRegNo());
         assertEquals("1234", account.getAccountNo());

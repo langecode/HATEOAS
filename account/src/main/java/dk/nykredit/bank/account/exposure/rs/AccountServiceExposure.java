@@ -16,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,7 +24,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -38,7 +38,16 @@ import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.nic.rs.EntityResponseBuilder;
 import dk.nykredit.nic.rs.error.ErrorRepresentation;
 import dk.nykredit.time.CurrentTime;
-import io.swagger.annotations.*;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
+import io.swagger.annotations.ResponseHeader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,16 +74,26 @@ import org.slf4j.LoggerFactory;
 @DeclareRoles("advisor")
 @Api(value = "/accounts", tags = {"accounts"})
 public class AccountServiceExposure {
-    private static final String CONCEPT_NAME = "account";
-    private static final String CONCEPT_VERSION = "2.0.0";
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountServiceExposure.class);
 
+    private final Map<String, AccountsProducerMethod> accountsProducers = new HashMap<>();
+    private final Map<String, AccountProducerMethod> accountProducers = new HashMap<>();
 
     @EJB
     private AccountArchivist archivist;
 
+
+    public AccountServiceExposure() {
+        accountsProducers.put("application/hal+json", this::listServiceGeneration1Version1);
+        accountsProducers.put("application/hal+json;concept=accountoverview;v=1", this::listServiceGeneration1Version1);
+
+        accountProducers.put("application/hal+json", this::getServiceGeneration1Version2);
+        accountProducers.put("application/hal+json;concept=account;v=1", this::getServiceGeneration1Version1);
+        accountProducers.put("application/hal+json;concept=account;v=2", this::getServiceGeneration1Version2);
+    }
+
     @GET
-    @Produces({"application/hal+json"})
+    @Produces({"application/hal+json", "application/hal+json;concept=accountoverview;v=1"})
     @ApiOperation(value = "lists accounts", response = AccountsRepresentation.class,
             authorizations = {@Authorization(value = "oauth", scopes = {
                                     @AuthorizationScope(scope = "advisor", description = "allows getting every account")
@@ -84,16 +103,18 @@ public class AccountServiceExposure {
             produces = "application/hal+json, application/hal+json;concept=accountoverview;v=1",
             notes = "List all accounts in a default projection, which is AccountOverview version 1" +
                     "Supported projections and versions are: " +
-                    "AccountOverview in version 1 " +
-                    "The Accept header for the default version is application/hal+json;concept=AccountOverview;v=1.0.0.... " +
-                    "The format for the default version is {....}", nickname = "listAccounts")
-    public Response list(@Context UriInfo uriInfo, @Context Request request) {
-        return listServiceGeneration1Version1(uriInfo, request);
+                    "account overview in version 1 which means the Accept header for the default version is " +
+                    "application/hal+json;concept=accountoverview;v=1.... " +
+                    "The format for the default version is {....}",
+            nickname = "listAccounts"
+            )
+    public Response list(@HeaderParam("Accept") String accept, @Context UriInfo uriInfo, @Context Request request) {
+        return accountsProducers.get(accept).getResponse(uriInfo, request);
     }
 
     @GET
     @Path("{regNo}-{accountNo}")
-    @Produces({"application/hal+json"})
+    @Produces({"application/hal+json", "application/hal+json;concept=account;v=1", "application/hal+json;concept=account;v=2"})
     @ApiOperation(value = "gets the information from a single account", response = AccountRepresentation.class,
             authorizations = {@Authorization(value = "oauth", scopes = {
                     @AuthorizationScope(scope = "customer", description = "allows getting own account"),
@@ -103,28 +124,31 @@ public class AccountServiceExposure {
             notes = "obtain a single account back in a default projection, which is Account version 2" +
                     " Supported projections and versions are:" +
                     " AccountSparse in version1 and Account in version 2" +
-                    " The format of the default version is .... ", nickname = "getAccount")
+                    " The format of the default version is .... - The Accept Header is not marked as required in the swagger",
+            nickname = "listAccounts"
+            )
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No account found.")
-    })
+            })
     public Response get(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
                         @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
+                        @HeaderParam("Accept") String accept,
                         @Context UriInfo uriInfo, @Context Request request) {
         LOGGER.info("Default version of account collected");
-        return getServiceGeneration1Version2(regNo, accountNo, uriInfo, request);
+        return accountProducers.get(accept).getResponse(regNo, accountNo, uriInfo, request);
     }
 
     @PUT
     @RolesAllowed("advisor")
     @Path("{regNo}-{accountNo}")
     @Produces({"application/hal+json"})
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes("application/json")
     @LogDuration(limit = 50)
     @ApiOperation(value = "Create new or update existing account", response = AccountRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope( scope = "system", description = "allows getting coOwned account"),
-                    @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
+                    @AuthorizationScope(scope = "system", description = "allows getting coOwned account"),
+                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
             },
             notes = "PUT is used to create a new account from scratch and may be used to alter the name of the account",
             consumes = "application/json",
@@ -138,7 +162,7 @@ public class AccountServiceExposure {
                             @ResponseHeader(name = "Content-Type", description = "a link to the created resource"),
                             @ResponseHeader(name = "X-Log-Token", description = "an ide for reference purposes in logs etc")
                     })
-    })
+            })
     public Response createOrUpdate(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
                                    @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
                                    @ApiParam(value = "account") @Valid AccountUpdateRepresentation account,
@@ -161,44 +185,26 @@ public class AccountServiceExposure {
         int maxAge = 30;
         cc.setMaxAge(maxAge);
 
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("concept", "account");
-        parameters.put("v", "2");
-
         return Response.created(URI.create(uriInfo.getPath()))
                 .entity(new AccountRepresentation(a, uriInfo))
                 .cacheControl(cc).expires(Date.from(CurrentTime.now().plusSeconds(maxAge)))
                 .status(201)
-                .type(EntityResponseBuilder.getMediaType(parameters, true))
+                .type("application/hal+json;concept=account;v=2")
                 .build();
     }
 
-    @GET
-    @Produces({"application/hal+json;concept=accountoverview;v=1", "application/hal+json+accountoverview+1"})
-    @LogDuration(limit = 50)
-    public Response listServiceGeneration1Version1(@Context UriInfo uriInfo, @Context Request request) {
+    Response listServiceGeneration1Version1(UriInfo uriInfo, Request request) {
         List<Account> accounts = archivist.listAccounts();
         return new EntityResponseBuilder<>(accounts, list -> new AccountsRepresentation(list, uriInfo))
+                .name("accountoverview")
+                .version("1")
                 .maxAge(10)
                 .build(request);
     }
 
-    @GET
-    @Path("{regNo}-{accountNo}")
-    @Produces({"application/hal+json;concept=account;v=1", "application/hal+json+account+1"})
-    @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=Account;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Account;v=1.0.0"
-     */
 
-    public Response getServiceGeneration1Version1(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
-                                                  @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
-                                                  @Context UriInfo uriInfo, @Context Request request) {
+    @LogDuration(limit = 50)
+    Response getServiceGeneration1Version1(String regNo, String accountNo, UriInfo uriInfo, Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
         LOGGER.info("Usage - application/hal+json;concept=account;v=1");
         return new EntityResponseBuilder<>(account, acc -> new AccountSparseRepresentation(acc, uriInfo))
@@ -208,21 +214,8 @@ public class AccountServiceExposure {
                 .build(request);
     }
 
-    @GET
-    @Path("{regNo}-{accountNo}")
-    @Produces({"application/hal+json;concept=account;v=2", "application/hal+json+account+2"})
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=Account;v=2.0.0" is removed and replaced with
-     * "{"application/hal+json+account+2" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Account;v=2.0.0"
-     */
-    public Response getServiceGeneration1Version2(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
-                                                  @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
-                                                  @Context UriInfo uriInfo, @Context Request request) {
+    Response getServiceGeneration1Version2(String regNo, String accountNo, UriInfo uriInfo, Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
         LOGGER.info("Usage - application/hal+json;concept=account;v=2");
         return new EntityResponseBuilder<>(account, acc -> new AccountRepresentation(acc, acc.getTransactions(), uriInfo))
@@ -230,6 +223,14 @@ public class AccountServiceExposure {
                 .version("2")
                 .maxAge(60)
                 .build(request);
+    }
+
+    interface AccountsProducerMethod {
+        Response getResponse(UriInfo uriInfo, Request request);
+    }
+
+    interface AccountProducerMethod {
+        Response getResponse(String regNo, String accountNo, UriInfo uriInfo, Request request);
     }
 
 }

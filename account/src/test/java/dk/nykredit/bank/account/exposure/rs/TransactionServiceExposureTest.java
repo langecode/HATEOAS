@@ -48,7 +48,7 @@ public class TransactionServiceExposureTest {
         when(archivist.getTransactions("5479", "123456", Optional.empty(), Optional.empty(), sort)).thenReturn(
                 Collections.singletonList(new Transaction(account, new BigDecimal("1234.42"), "description")));
 
-        Response response = service.list("5479", "123456", "", "", "", ui, request);
+        Response response = service.list("application/hal+json","5479", "123456", "", "", "", ui, request);
         TransactionsRepresentation transactions = (TransactionsRepresentation) response.getEntity();
 
         assertEquals(1, transactions.getTransactions().size());
@@ -68,7 +68,7 @@ public class TransactionServiceExposureTest {
         Transaction dbTransaction = new Transaction(account, new BigDecimal("1234.42"), "description");
         when(archivist.getTransaction("5479", "123456", "xxx-yyy")).thenReturn(dbTransaction);
 
-        Response response = service.get("5479", "123456", "xxx-yyy", ui, request);
+        Response response = service.get("application/hal+json","5479", "123456", "xxx-yyy", ui, request);
         TransactionRepresentation transaction = (TransactionRepresentation) response.getEntity();
 
         assertEquals("1234.42", transaction.getAmount());
@@ -88,7 +88,7 @@ public class TransactionServiceExposureTest {
         Transaction dbTransaction = new Transaction("human-readable-semantic-identifier", account, new BigDecimal("1234.42"), "a description");
         when(archivist.getTransaction("5479", "123456", "xxx-yyy")).thenReturn(dbTransaction);
 
-        Response response = service.get("5479", "123456", "xxx-yyy", ui, request);
+        Response response = service.get("application/hal+json","5479", "123456", "xxx-yyy", ui, request);
         TransactionRepresentation transaction = (TransactionRepresentation) response.getEntity();
 
         assertEquals("1234.42", transaction.getAmount());

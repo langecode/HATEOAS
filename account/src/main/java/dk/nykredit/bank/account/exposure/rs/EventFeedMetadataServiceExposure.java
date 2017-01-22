@@ -1,6 +1,5 @@
 package dk.nykredit.bank.account.exposure.rs;
 
-import dk.nykredit.nic.rs.EntityResponseBuilder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +9,7 @@ import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
@@ -49,27 +49,18 @@ import io.swagger.annotations.Authorization;
 @Api(value = "/account-events-metadata",
      tags = {"metadata"})
 public class EventFeedMetadataServiceExposure {
+    private final Map<String, EventMetadataProducerMethod> eventMetadataProducers = new HashMap<>();
 
     @EJB
     private AccountArchivist archivist;
 
-    @GET
-    @Produces({"application/hal+json"})
-    @ApiOperation(
-            value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
-            authorizations = {@Authorization( value = "Bearer")},
-            notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
-                    "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
-                    "feed for the account service",
-            tags = {"events"},
-            nickname = "getMetadata"
-    )
-    public Response getMetadata(@Context UriInfo uriInfo, @Context Request request) {
-        return getMetaDataSG1V1(uriInfo, request);
+    public EventFeedMetadataServiceExposure() {
+        eventMetadataProducers.put("application/hal+json", this::getMetaDataSG1V1);
+        eventMetadataProducers.put("application/hal+json;concept=metadata;v=1", this::getMetaDataSG1V1);
     }
 
     @GET
-    @Produces({"application/hal+json", "application/hal+json;concept=metadata;v=1","application/hal+json+metadata+1"})
+    @Produces({"application/hal+json", "application/hal+json;concept=metadata;v=1"})
     @ApiOperation(
             value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
             authorizations = {@Authorization(value = "Bearer")},
@@ -80,20 +71,26 @@ public class EventFeedMetadataServiceExposure {
             produces = "application/hal+json,  application/hal+json;concept=metadata;v=1",
             nickname = "getMetadata"
     )
+    public Response getMetadata(@HeaderParam("Accept") String accept, @Context UriInfo uriInfo, @Context Request request) {
+        return eventMetadataProducers.get(accept).getResponse(uriInfo, request);
+    }
+
     @LogDuration(limit = 50)
-    public Response getMetaDataSG1V1(@Context UriInfo uriInfo, @Context Request request) {
+    public Response getMetaDataSG1V1(UriInfo uriInfo, Request request) {
         EventsMetadataRepresentation em  = new EventsMetadataRepresentation("", uriInfo);
         CacheControl cc = new CacheControl();
         int maxAge = 4 * 7 * 24 * 60 * 60;
         cc.setMaxAge(maxAge);
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("concept", "metadata");
-        parameters.put("v", "1");
+
         return Response.ok()
                 .entity(em)
                 .cacheControl(cc).expires(Date.from(CurrentTime.now().plusSeconds(maxAge)))
-                .type(EntityResponseBuilder.getMediaType(parameters, true))
+                .type("application/hal+json;concept=metadata;v=1")
                 .build();
+    }
+
+    interface EventMetadataProducerMethod {
+        Response getResponse(UriInfo uriInfo, Request request);
     }
 
 }

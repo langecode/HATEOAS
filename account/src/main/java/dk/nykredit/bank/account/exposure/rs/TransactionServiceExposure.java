@@ -17,6 +17,7 @@ import javax.ejb.Stateless;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,7 +26,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -40,11 +40,18 @@ import dk.nykredit.bank.account.model.Account;
 import dk.nykredit.bank.account.model.Event;
 import dk.nykredit.bank.account.model.Transaction;
 import dk.nykredit.bank.account.persistence.AccountArchivist;
+import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.nic.rs.EntityResponseBuilder;
 import dk.nykredit.nic.rs.error.ErrorRepresentation;
-import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.time.CurrentTime;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
+import io.swagger.annotations.ResponseHeader;
 
 /**
  * REST exposure of account transactions.
@@ -56,14 +63,23 @@ import io.swagger.annotations.*;
 @Api(value = "/accounts/{regNo}-{accountNo}/transactions",
      tags = {"immutable", "transactions"})
 public class TransactionServiceExposure {
-    private static final String CONCEPT_NAME = "transaction";
-    private static final String CONCEPT_VERSION = "1.0.0";
+
+    private final Map<String, TransactionsProducerMethod> transactionsProducers = new HashMap<>();
+    private final Map<String, TransactionProducerMethod> transactionProducers = new HashMap<>();
 
     @EJB
     private AccountArchivist archivist;
 
+    public TransactionServiceExposure() {
+        transactionsProducers.put("application/hal+json", this::listTransactionsSG1V1);
+        transactionsProducers.put("application/hal+json;concept=transactionoverview;v=1", this::listTransactionsSG1V1);
+
+        transactionProducers.put("application/hal+json", this::getSG1V1);
+        transactionProducers.put("application/hal+json;concept=transaction;v=1", this::getSG1V1);
+    }
+
     @GET
-    @Produces({ "application/hal+json" })
+    @Produces({ "application/hal+json", "application/hal+json;concept=transactionoverview;v=1" })
     @ApiOperation(
             value = "obtain all transactions on account for a given account", response = TransactionsRepresentation.class,
             authorizations = {@Authorization(value = "oauth", scopes = {
@@ -73,52 +89,72 @@ public class TransactionServiceExposure {
             tags = {"sort", "elements", "interval", "transactions"},
             produces = "application/hal+json, application/hal+json;concept=transactionoverview;v=1",
             nickname = "listTransactions"
-    )
-    public Response list(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
+        )
+    public Response list(@HeaderParam("Accept") String accept, @PathParam("regNo") String regNo,
+                         @PathParam("accountNo") String accountNo,
                          @QueryParam("sort") String sort, @QueryParam("elements") String elements,
                          @QueryParam("interval") String interval,
                          @Context UriInfo uriInfo, @Context Request request) {
-
-        return listTransactionsSG1V1(regNo, accountNo, sort, elements, interval, uriInfo, request);
+        return transactionsProducers.get(accept).getResponse(regNo, accountNo, sort, elements, interval, uriInfo, request);
     }
 
     @GET
     @Path("{id}")
-    @Produces({ "application/hal+json" })
+    @Produces({ "application/hal+json", "application/hal+json;concept=transaction;v=1"})
     @LogDuration(limit = 50)
     @ApiOperation(
             value = "obtain the individual single transaction from an account", response = TransactionRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
+                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
             },
             produces = "application/hal+json, application/hal+json;concept=transaction;v=1",
             nickname = "getTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No transaction found.")
-    })
-    public Response get(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo, @PathParam("id") String id,
+            })
+    /**
+     * the use of authorization scopes to signal roles is a bit dubious and thus this may change in the future
+     */
+    public Response get(@HeaderParam("Accept") String accept,
+                        @PathParam("regNo") String regNo,
+                        @PathParam("accountNo") String accountNo,
+                        @PathParam("id") String id,
                         @Context UriInfo uriInfo, @Context Request request) {
-        return getSG1V1(regNo, accountNo, id, uriInfo, request);
+        return transactionProducers.get(accept).getResponse(regNo, accountNo, id, uriInfo, request);
     }
 
     @PUT
     @Path("{id}")
     @RolesAllowed("tx-system")
-    @Produces({ "application/hal+json" })
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({ "application/hal+json"})
+    @Consumes("application/json")
     @LogDuration(limit = 50)
     @ApiOperation(value = "creates a single transaction on an account", response = TransactionRepresentation.class,
             authorizations = {
                     @Authorization(value = "oauth", scopes = {
                         @AuthorizationScope(scope = "system", description = "allows getting coOwned account")})
             },
+            consumes = "application/json",
+            produces = "application/hal+json, application/hal+json;concept=transaction;v=1",
             nickname = "setTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Could create the new transaction", response = ErrorRepresentation.class),
             @ApiResponse(code = 201, message = "New transaction created.", response = TransactionRepresentation.class),
-            @ApiResponse(code = 202, message = "The input has been accepted and a new transaction will most likely be created.")
-    })
+            @ApiResponse(code = 202, message = "New transaction will be created at some point in time.", response = Void.class,
+                    responseHeaders = {
+                            @ResponseHeader(name = "Location", description = "A link to where the response can be obtained"),
+                            @ResponseHeader(name = "Retry-After", description = "A time where you when you can expect the response ")
+                    })
+            })
+    /**
+     * note that the 202 is included from the beginning of the API to avoid breaking the API  when the 202 is used e.g.
+     * if unavoidable external dependencies are consuming time above the 50 ms limit and a 202 is returned instead of
+     * the 200. Therefore it may be a good idea to include the 202 at an early stage in you API to avoid introducing
+     * the need for the X-Service-Generation header signalling that the API is broken not for content but structurally
+     * broken. Content is handled through the versioning mechanism in the content-type for producers and possibly for
+     * the consumers (the latter will not happen as often)
+     */
     public Response set(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo, @PathParam("id") String id,
                         @ApiParam(value = "transaction") @Valid TransactionUpdateRepresentation tx,
                         @Context UriInfo uriInfo, @Context Request request) {
@@ -137,17 +173,15 @@ public class TransactionServiceExposure {
                 int maxAge = 30;
                 cc.setMaxAge(maxAge);
 
-                Map<String, String> parameters = new HashMap<>();
-                parameters.put("concept", "transaction");
-                parameters.put("v", "1.0.0");
                 TransactionRepresentation transaction = new TransactionRepresentation(t, uriInfo);
                 Response response = Response.created(URI.create(uriInfo.getPath()))
                         .entity(transaction)
                         .cacheControl(cc).expires(Date.from(CurrentTime.now().plusSeconds(maxAge)))
                         .status(201)
-                        .type(EntityResponseBuilder.getMediaType(parameters, true))
+                        .type("application/hal+json;concept=transaction;v=1")
                         .build();
-                Event newTX = new Event(new URI(uriInfo.getPath()), Event.getCategory(accountNo, regNo), "new transaction on account " + regNo + "-" + accountNo);
+                Event newTX = new Event(new URI(uriInfo.getPath()), Event.getCategory(accountNo, regNo),
+                        "new transaction on account " + regNo + "-" + accountNo);
                 archivist.save(newTX);
                 return response;
             } catch (URISyntaxException e) {
@@ -161,21 +195,9 @@ public class TransactionServiceExposure {
         throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
     }
 
-    @GET
-    @Produces({"application/hal+json;concept=transactionoverview;v=1", "application/hal+json+transactionoverview+1" })
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=TransactionOverview;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+transactionoverview+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Transaction;v=1.0.0"
-     */
-    public Response listTransactionsSG1V1(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
-                                          @QueryParam("sort") String sort, @QueryParam("elements") String elements,
-                                          @QueryParam("interval") String interval,
-                                          @Context UriInfo uriInfo, @Context Request request) {
+    public Response listTransactionsSG1V1(String regNo, String accountNo, String sort, String elements,
+                                          String interval, UriInfo uriInfo, Request request) {
         List<Sort> sortAs = Sort.getSortings(sort);
         Optional<Element> elementSet = Element.getElement(elements);
         Optional<Interval> withIn = Interval.getInterval(interval);
@@ -187,25 +209,23 @@ public class TransactionServiceExposure {
                 .build(request);
     }
 
-    @GET
-    @Path("{id}")
-    @Produces({"application/hal+json;concept=transaction;v=1", "application/hal+json+transaction+1" })
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=Transaction;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+transaction+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Transaction;v=1.0.0"
-     */
-    public Response getSG1V1(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo, @PathParam("id") String id,
-                        @Context UriInfo uriInfo, @Context Request request) {
+    public Response getSG1V1(String regNo, String accountNo, String id, UriInfo uriInfo, Request request) {
         Transaction transaction = archivist.getTransaction(regNo, accountNo, id);
         return new EntityResponseBuilder<>(transaction, t -> new TransactionRepresentation(t, uriInfo))
                 .maxAge(7 * 24 * 60 * 60)
                 .name("transaction")
                 .version("1")
                 .build(request);
+    }
+
+    interface TransactionsProducerMethod {
+        Response getResponse(String regNo, String accountNo, String sort, String elements, String interval,
+                             UriInfo uriInfo, Request request);
+    }
+
+    interface TransactionProducerMethod {
+        Response getResponse(String regNo, String accountNo, String id,
+                             UriInfo uriInfo, Request request);
     }
 }

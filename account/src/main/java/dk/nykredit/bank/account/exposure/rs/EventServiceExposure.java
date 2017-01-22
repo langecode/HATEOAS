@@ -1,6 +1,5 @@
 package dk.nykredit.bank.account.exposure.rs;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,11 +10,11 @@ import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -23,15 +22,17 @@ import javax.ws.rs.core.UriInfo;
 
 import dk.nykredit.api.capabilities.Interval;
 import dk.nykredit.bank.account.exposure.rs.model.EventRepresentation;
-import dk.nykredit.bank.account.exposure.rs.model.EventsMetadataRepresentation;
 import dk.nykredit.bank.account.exposure.rs.model.EventsRepresentation;
 import dk.nykredit.bank.account.model.Event;
 import dk.nykredit.bank.account.persistence.AccountArchivist;
 import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.nic.rs.EntityResponseBuilder;
-import dk.nykredit.time.CurrentTime;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 
 /**
  * REST exposure of events that are related to the account.
@@ -49,14 +50,27 @@ import io.swagger.annotations.*;
 @Api(value = "/account-events",
      tags = {"events"})
 public class EventServiceExposure {
-    private static final String CONCEPT_NAME = "accountEvent";
-    private static final String CONCEPT_VERSION = "1.0.0";
+    private final Map<String, EventsProducerMethod> eventsProducers = new HashMap<>();
+    private final Map<String, EventProducerMethod> eventProducers = new HashMap<>();
+    private final Map<String, EventsCategoryProducerMethod> eventCategoryProducers = new HashMap<>();
 
     @EJB
     private AccountArchivist archivist;
 
+    public EventServiceExposure() {
+        eventsProducers.put("application/hal+json", this::listAllSG1V1);
+        eventsProducers.put("application/hal+json;concept=events;v=1", this::listAllSG1V1);
+
+        eventProducers.put("application/hal+json", this::getSG1V1);
+        eventProducers.put("application/hal+json;concept=event;v=1", this::getSG1V1);
+
+        eventCategoryProducers.put("application/hal+json", this::listByCategorySG1V1);
+        eventCategoryProducers.put("application/hal+json;concept=eventcategory;v=1", this::listByCategorySG1V1);
+
+    }
+
     @GET
-    @Produces({"application/hal+json"})
+    @Produces({"application/hal+json", "application/hal+json;concept=events;v=1"})
     @ApiOperation(
             value = "obtain all events emitted by the account-event service", response = EventsRepresentation.class,
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
@@ -67,15 +81,15 @@ public class EventServiceExposure {
             produces = "application/hal+json,  application/hal+json;concept=events;v=1",
             nickname = "listAllEvents"
     )
-    public Response listAll(@QueryParam("interval") String interval,
+    public Response listAll(@HeaderParam("Accept") String accept, @QueryParam("interval") String interval,
                          @Context UriInfo uriInfo, @Context Request request) {
-        return listAllSG1V1(interval, uriInfo, request);
+        return eventsProducers.get(accept).getResponse(interval, uriInfo, request);
     }
 
 
     @GET
     @Path("{category}")
-    @Produces({ "application/hal+json" })
+    @Produces({ "application/hal+json", "application/hal+json;concept=eventcategory;v=1"})
     @ApiOperation(value = "obtain all events scoped to a certain category", response = EventsRepresentation.class,
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
@@ -85,15 +99,15 @@ public class EventServiceExposure {
             produces = "application/hal+json,  application/hal+json;concept=eventcategory;v=1",
             nickname = "getEventsByCategory"
     )
-    public Response getByCategory(@PathParam("category") String category,
+    public Response getByCategory(@HeaderParam("Accept") String accept, @PathParam("category") String category,
                                 @QueryParam("interval") String interval,
                                 @Context UriInfo uriInfo, @Context Request request) {
-        return listByCategorySG1V1(category, interval, uriInfo, request);
+        return eventCategoryProducers.get(accept).getResponse(category, interval, uriInfo, request);
     }
 
     @GET
     @Path("{category}/{id}")
-    @Produces({ "application/hal+json" })
+    @Produces({ "application/hal+json", "application/hal+json;concept=event;v=1" })
     @LogDuration(limit = 50)
     @ApiOperation(
             value = "obtain the individual events from an account", response = EventRepresentation.class,
@@ -104,24 +118,13 @@ public class EventServiceExposure {
             nickname = "getEvent")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No event found.")
-    })
-    public Response getSingle(@PathParam("category") String category, @PathParam("id") String id,
-                        @Context UriInfo uriInfo, @Context Request request) {
-        return getSG1V1(category, id, uriInfo, request);
+            })
+    public Response getSingle(@HeaderParam("Accept") String accept, @PathParam("category")String category, @PathParam("id")String id,
+                              @Context UriInfo uriInfo, @Context Request request) {
+        return eventProducers.get(accept).getResponse(category, id, uriInfo, request);
     }
 
-
-    @GET
-    @Produces({"application/hal+json;concept=events;v=1", "application/hal+json+account+events+1"})
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=TransactionOverview;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+event+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
-     */
     public Response listAllSG1V1(String interval, UriInfo uriInfo, Request request) {
         Optional<Interval> withIn = Interval.getInterval(interval);
         List<Event> events = archivist.findEvents(withIn);
@@ -132,22 +135,8 @@ public class EventServiceExposure {
                 .build(request);
     }
 
-
-    @GET
-    @Path("{category}")
-    @Produces({"application/hal+json;concept=eventcategory;v=1", "application/hal+json+account+eventcategory+1" })
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=AccountEvent;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+event+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
-     */
-    public Response listByCategorySG1V1(@PathParam("category") String category,
-                                        @QueryParam("interval") String interval,
-                                        @Context UriInfo uriInfo, @Context Request request) {
+    public Response listByCategorySG1V1(String category, String interval, UriInfo uriInfo, Request request) {
         Optional<Interval> withIn = Interval.getInterval(interval);
         List<Event> events = archivist.getEventsForCategory(category, withIn);
         return new EntityResponseBuilder<>(events, txs -> new EventsRepresentation(events, uriInfo))
@@ -157,27 +146,26 @@ public class EventServiceExposure {
                 .build(request);
     }
 
-    @GET
-    @Path("{category}/{id}")
-    @Produces({"application/hal+json;concept=event;v=1", "application/hal+json+account+event+1" })
     @LogDuration(limit = 50)
-    /**
-     * If you are running a JEE container that inhibits the creation of resources, because it does
-     * not support the specification of the Accept header and thus does not support the media-range
-     * parameters, a simple producer has to be annotated and if the
-     * "application/hal+json;concept=Event;v=1.0.0" is removed and replaced with
-     * "{"application/hal+json+account+event+1" then the endpoint will work with versioning.
-     * The correct content-type controlled by the Accept header is "application/hal+json;concept=Event;v=1.0.0"
-     */
-    public Response getSG1V1(@PathParam("category") String category, @PathParam("id") String id,
-                        @Context UriInfo uriInfo, @Context Request request) {
+    public Response getSG1V1(String category, String id, UriInfo uriInfo, Request request) {
         Event event = archivist.getEvent(category, id);
-        return new EntityResponseBuilder<>(event, e -> new EventRepresentation(e,uriInfo))
+        return new EntityResponseBuilder<>(event, e -> new EventRepresentation(e, uriInfo))
                 .maxAge(7 * 24 * 60 * 60)
                 .name("event")
                 .version("1")
                 .build(request);
     }
 
+    interface EventsProducerMethod {
+        Response getResponse(String interval, UriInfo uriInfo, Request request);
+    }
+
+    interface EventProducerMethod {
+        Response getResponse(String category, String id, UriInfo uriInfo, Request request);
+    }
+
+    interface EventsCategoryProducerMethod {
+        Response getResponse(String interval, String category, UriInfo uriInfo, Request request);
+    }
 
 }

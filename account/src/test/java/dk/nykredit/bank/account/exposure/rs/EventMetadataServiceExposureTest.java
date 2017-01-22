@@ -35,7 +35,7 @@ public class EventMetadataServiceExposureTest {
         UriInfo ui = mock(UriInfo.class);
         when(ui.getBaseUriBuilder()).then(new UriBuilderFactory(URI.create("http://mock")));
         Request request = mock(Request.class);
-        Response response = service.getMetadata(ui, request);
+        Response response = service.getMetadata("application/hal+json", ui, request);
         EventsMetadataRepresentation info = (EventsMetadataRepresentation) response.getEntity();
         assertNotNull(info);
         assertTrue(info.getMetadata().contains("purpose"));
@@ -47,7 +47,7 @@ public class EventMetadataServiceExposureTest {
         UriInfo ui = mock(UriInfo.class);
         when(ui.getBaseUriBuilder()).then(new UriBuilderFactory(URI.create("http://mock")));
         Request request = mock(Request.class);
-        Response response = service.getMetadata(ui, request);
+        Response response = service.getMetadata("application/hal+json;concept=metadata;v=1", ui, request);
         EventsMetadataRepresentation info = (EventsMetadataRepresentation) response.getEntity();
         assertNotNull(info);
         assertTrue(info.getMetadata().contains("purpose"));
