@@ -93,7 +93,7 @@ public class AccountServiceExposureIT {
         WebTarget target = ClientBuilder.newClient().register(JacksonJaxbJsonProvider.class).target("http://localhost:7001/hateoas");
         Map<String, Object> response = target.path("accounts").path("5479-1234567")
                 .request()
-                .accept("application/hal+json;concept=Account;v=1.0.0")
+                .accept("application/hal+json;concept=account;v=1")
                 .header("X-Client-Version", "1.0.0")
                 .header("X-Service-Generation", "1")
                 .header("X-Log-Token", DiagnosticContext.getLogToken())

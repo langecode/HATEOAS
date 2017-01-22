@@ -152,14 +152,6 @@
                             <type>war</type>
                             <pingURL>http://localhost:7001/hateoas/ping</pingURL>
                         </deployable>
-                        <deployable>
-                            <groupId>dk.nykredit.security</groupId>
-                            <artifactId>stub-services</artifactId>
-                            <type>war</type>
-                            <properties>
-                                <context>/security</context>
-                            </properties>
-                        </deployable>
                     </deployables>
                 </configuration>
                 <executions>
