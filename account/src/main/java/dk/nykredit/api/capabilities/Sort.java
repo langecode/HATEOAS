@@ -45,14 +45,14 @@ public class Sort {
     }
 
     /**
-     * the attribute name used in the representation of the object
+     * @return the attribute name used in the representation of the object
      */
     public String getAttribute() {
         return attribute;
     }
 
     /**
-     * the direction (ASCending or DESCending) {@link Direction} of the attribute
+     * @return the direction (ASCending or DESCending) {@link Direction} of the attribute
      * name used in the representation of the object with respect to sorting order in the response
      */
     public Direction getDirection() {

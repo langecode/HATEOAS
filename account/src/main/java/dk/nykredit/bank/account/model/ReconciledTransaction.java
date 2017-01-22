@@ -70,7 +70,7 @@ public class ReconciledTransaction extends AbstractAuditable {
     }
 
     public Boolean getReconciled() {
-        return reconciled.equals("Y");
+        return "Y".equals(reconciled);
     }
 
     public String getNote() {

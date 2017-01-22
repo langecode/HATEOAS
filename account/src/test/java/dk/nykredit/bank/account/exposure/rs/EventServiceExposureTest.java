@@ -1,7 +1,14 @@
 package dk.nykredit.bank.account.exposure.rs;
 
+
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+
 import dk.nykredit.bank.account.exposure.rs.model.EventRepresentation;
-import dk.nykredit.bank.account.exposure.rs.model.EventsMetadataRepresentation;
 import dk.nykredit.bank.account.exposure.rs.model.EventsRepresentation;
 import dk.nykredit.bank.account.model.Event;
 import dk.nykredit.bank.account.persistence.AccountArchivist;
@@ -13,16 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,18 +32,6 @@ public class EventServiceExposureTest {
 
     @InjectMocks
     EventServiceExposure service;
-
-    @Test
-    public void testMetadata(){
-        UriInfo ui = mock(UriInfo.class);
-        when(ui.getBaseUriBuilder()).then(new UriBuilderFactory(URI.create("http://mock")));
-        Request request = mock(Request.class);
-        Response response = service.getMetadata(ui, request);
-        EventsMetadataRepresentation info = (EventsMetadataRepresentation) response.getEntity();
-        assertNotNull(info);
-        assertTrue(info.getMetadata().contains("purpose"));
-        assertEquals("http://mock/account-events", info.getSelf().getHref());
-    }
 
     @Test
     public void testListEvents() throws URISyntaxException {
@@ -66,7 +52,7 @@ public class EventServiceExposureTest {
         eventList.add(new Event(new URI("accounts/5479-123456/cards"),
                 "5479-123456-other", CurrentTime.now()));
         eventList.add(new Event(new URI("accounts/5479-123456/transactions/mockedTxSID"),
-                "5479-123456", CurrentTime.now().minusDays(1)));
+                "5479-123456", CurrentTime.nowAsZonedDateTime().minusDays(1).toInstant()));
 
         when(archivist.findEvents(Optional.empty()))
                 .thenReturn(eventList);

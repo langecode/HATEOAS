@@ -46,7 +46,7 @@ public class Interval {
     private final ZonedDateTime end;
 
     private Interval(ZonedDateTime start) {
-        this(start, CurrentTime.now());
+        this(start, CurrentTime.nowAsZonedDateTime());
     }
 
     private Interval(ZonedDateTime start, ZonedDateTime end) {
@@ -76,7 +76,8 @@ public class Interval {
      * The interval is constructed from a syntax like:
      *
      * {@literal(interval="<from/at/::+/-/#d/#/now/yesterday/tomorrow>|<to/::+/-/#d/#/now/yesterday/tomorrow>")}
-     * the regexp is: <code>"^(from::|at::)?(-|\\+)?(\\d+d?|now|yesterday|tomorrow)?(\\|)?(to::)?(-|\\+)?(\\d+d?|now|yesterday|tomorrow)?"</code>
+     * the regexp is:
+     * <code>"^(from::|at::)?(-|\\+)?(\\d+d?|now|yesterday|tomorrow)?(\\|)?(to::)?(-|\\+)?(\\d+d?|now|yesterday|tomorrow)?"</code>
      *
      * @param interval containing a time or a starting and an ending point in time according to the regexp above
      * @return an Interval with a start and an end, is the values are nor valid a NILL instance is returned
@@ -111,7 +112,7 @@ public class Interval {
             return Optional.of(new Interval(zds, zde));
         } else {
             if (startPoint.contains("from::"))
-                return Optional.of(new Interval(zds, CurrentTime.now()));
+                return Optional.of(new Interval(zds, CurrentTime.nowAsZonedDateTime()));
             if (startPoint.contains("at::"))
                 return Optional.of(new Interval(zds, zds.plusHours(DEFAULT_TIME_SPAN)));
         }
@@ -134,7 +135,7 @@ public class Interval {
         if (time.matches("^\\d+d")) {
             int len = time.length() - 1;
             long offset = Integer.parseInt(time.substring(0, len));
-            zd = relative ? zd.withZoneSameInstant(ZoneId.of("UTC")).plusDays(offset) : CurrentTime.now().plusDays(offset);
+            zd = relative ? zd.withZoneSameInstant(ZoneId.of("UTC")).plusDays(offset) : CurrentTime.nowAsZonedDateTime().plusDays(offset);
         }
         return zd;
     }
@@ -143,7 +144,7 @@ public class Interval {
         if (time.matches("^[-|\\+]+\\d+d")) {
             int len = time.length() - 1;
             long offset = Integer.parseInt(time.substring(1, len));
-            ZonedDateTime utc = relative ? zd.withZoneSameInstant(ZoneId.of("UTC")) : CurrentTime.now();
+            ZonedDateTime utc = relative ? zd.withZoneSameInstant(ZoneId.of("UTC")) : CurrentTime.nowAsZonedDateTime();
             if ((time.charAt(0) == '-') && (time.charAt(len) == 'd')) {
                 zd = utc.minusDays(offset);
             } else {
@@ -166,13 +167,13 @@ public class Interval {
     private static ZonedDateTime ifTextual(ZonedDateTime zd, String time) {
         if (time.matches("now|tomorrow|yesterday")) {
             if (time.contains("now")) {
-                zd = CurrentTime.now();
+                zd = CurrentTime.nowAsZonedDateTime();
             }
             if (time.contains("tomorrow")) {
-                zd = CurrentTime.now().plusDays(1);
+                zd = CurrentTime.nowAsZonedDateTime().plusDays(1);
             }
             if (time.contains("yesterday")) {
-                zd = CurrentTime.now().minusDays(1);
+                zd = CurrentTime.nowAsZonedDateTime().minusDays(1);
             }
         }
         return zd;

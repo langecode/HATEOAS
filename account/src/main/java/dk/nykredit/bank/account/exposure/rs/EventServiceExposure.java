@@ -56,29 +56,15 @@ public class EventServiceExposure {
     private AccountArchivist archivist;
 
     @GET
-    @Produces({"application/hal+json;concept=metadata", "application/hal+json+metadata"})
-    @ApiOperation(
-            value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
-            authorizations = {@Authorization( value = "Bearer")},
-            notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
-                    "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
-                    "feed for the account service",
-            tags = {"events"},
-            nickname = "getMetadata"
-    )
-    public Response getMetadata(@Context UriInfo uriInfo, @Context Request request) {
-        return getMetaDataSG1V1(uriInfo);
-    }
-
-    @GET
     @Produces({"application/hal+json"})
     @ApiOperation(
             value = "obtain all events emitted by the account-event service", response = EventsRepresentation.class,
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service",
-            authorizations = {@Authorization( value = "Bearer"), @Authorization(value = "oauth")},
+            authorizations = {@Authorization(value = "Bearer"), @Authorization(value = "oauth")},
             tags = {"interval", "events"},
+            produces = "application/hal+json,  application/hal+json;concept=events;v=1",
             nickname = "listAllEvents"
     )
     public Response listAll(@QueryParam("interval") String interval,
@@ -94,8 +80,9 @@ public class EventServiceExposure {
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service, allowing for subscribers to have these grouped into categories",
-            authorizations = {@Authorization( value = "Bearer"), @Authorization(value = "oauth")},
+            authorizations = {@Authorization(value = "Bearer"), @Authorization(value = "oauth")},
             tags = {"interval", "events"},
+            produces = "application/hal+json,  application/hal+json;concept=eventcategory;v=1",
             nickname = "getEventsByCategory"
     )
     public Response getByCategory(@PathParam("category") String category,
@@ -111,8 +98,9 @@ public class EventServiceExposure {
     @ApiOperation(
             value = "obtain the individual events from an account", response = EventRepresentation.class,
             notes = "the event her is immutable and thus can be cached for a long time",
-            authorizations = {@Authorization( value = "Bearer"), @Authorization(value = "oauth")},
+            authorizations = {@Authorization(value = "Bearer"), @Authorization(value = "oauth")},
             tags = {"immutable", "events"},
+            produces = "application/hal+json,  application/hal+json;concept=event;v=1",
             nickname = "getEvent")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No event found.")
@@ -138,6 +126,8 @@ public class EventServiceExposure {
         Optional<Interval> withIn = Interval.getInterval(interval);
         List<Event> events = archivist.findEvents(withIn);
         return new EntityResponseBuilder<>(events, txs -> new EventsRepresentation(events, uriInfo))
+                .name("events")
+                .version("1")
                 .maxAge(60)
                 .build(request);
     }
@@ -161,6 +151,8 @@ public class EventServiceExposure {
         Optional<Interval> withIn = Interval.getInterval(interval);
         List<Event> events = archivist.getEventsForCategory(category, withIn);
         return new EntityResponseBuilder<>(events, txs -> new EventsRepresentation(events, uriInfo))
+                .name("eventcategory")
+                .version("1")
                 .maxAge(60)
                 .build(request);
     }
@@ -182,26 +174,10 @@ public class EventServiceExposure {
         Event event = archivist.getEvent(category, id);
         return new EntityResponseBuilder<>(event, e -> new EventRepresentation(e,uriInfo))
                 .maxAge(7 * 24 * 60 * 60)
-                .name(CONCEPT_NAME)
-                .version(CONCEPT_VERSION)
+                .name("event")
+                .version("1")
                 .build(request);
     }
 
-    @GET
-    @Produces({"application/hal+json;concept=metadata;v=1", "application/hal+json+metadata+1" })
-    @LogDuration(limit = 50)
-    public Response getMetaDataSG1V1(@Context UriInfo uriInfo) {
-        EventsMetadataRepresentation em  = new EventsMetadataRepresentation("", uriInfo);
-        CacheControl cc = new CacheControl();
-        int maxAge = 4*7*24*60*60;
-        cc.setMaxAge(maxAge);
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("concept", "metadata");
-        parameters.put("v", "1.0.0");
-        return Response.ok()
-                .entity(em)
-                .cacheControl(cc).expires(Date.from(CurrentTime.now().toInstant().plusSeconds(maxAge)))
-                .type(EntityResponseBuilder.getMediaType(parameters, false))
-                .build();
-    }
+
 }

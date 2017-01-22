@@ -66,11 +66,12 @@ public class TransactionServiceExposure {
     @Produces({ "application/hal+json" })
     @ApiOperation(
             value = "obtain all transactions on account for a given account", response = TransactionsRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
+                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
             },
             tags = {"sort", "elements", "interval", "transactions"},
+            produces = "application/hal+json, application/hal+json;concept=transactionoverview;v=1",
             nickname = "listTransactions"
     )
     public Response list(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
@@ -91,6 +92,7 @@ public class TransactionServiceExposure {
                     @AuthorizationScope( scope = "customer", description = "allows getting own account"),
                     @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
             },
+            produces = "application/hal+json, application/hal+json;concept=transaction;v=1",
             nickname = "getTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No transaction found.")
@@ -107,8 +109,9 @@ public class TransactionServiceExposure {
     @Consumes(MediaType.APPLICATION_JSON)
     @LogDuration(limit = 50)
     @ApiOperation(value = "creates a single transaction on an account", response = TransactionRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "system", description = "allows getting coOwned account")})
+            authorizations = {
+                    @Authorization(value = "oauth", scopes = {
+                        @AuthorizationScope(scope = "system", description = "allows getting coOwned account")})
             },
             nickname = "setTransaction")
     @ApiResponses(value = {
@@ -140,7 +143,7 @@ public class TransactionServiceExposure {
                 TransactionRepresentation transaction = new TransactionRepresentation(t, uriInfo);
                 Response response = Response.created(URI.create(uriInfo.getPath()))
                         .entity(transaction)
-                        .cacheControl(cc).expires(Date.from(CurrentTime.now().toInstant().plusSeconds(maxAge)))
+                        .cacheControl(cc).expires(Date.from(CurrentTime.now().plusSeconds(maxAge)))
                         .status(201)
                         .type(EntityResponseBuilder.getMediaType(parameters, true))
                         .build();
@@ -178,6 +181,8 @@ public class TransactionServiceExposure {
         Optional<Interval> withIn = Interval.getInterval(interval);
         List<Transaction> transactions = archivist.getTransactions(regNo, accountNo, elementSet, withIn, sortAs);
         return new EntityResponseBuilder<>(transactions, txs -> new TransactionsRepresentation(regNo, accountNo, transactions, uriInfo))
+                .name("transactionoverview")
+                .version("1")
                 .maxAge(10)
                 .build(request);
     }
@@ -199,8 +204,8 @@ public class TransactionServiceExposure {
         Transaction transaction = archivist.getTransaction(regNo, accountNo, id);
         return new EntityResponseBuilder<>(transaction, t -> new TransactionRepresentation(t, uriInfo))
                 .maxAge(7 * 24 * 60 * 60)
-                .name(CONCEPT_NAME)
-                .version(CONCEPT_VERSION)
+                .name("transaction")
+                .version("1")
                 .build(request);
     }
 }

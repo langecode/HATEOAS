@@ -2,7 +2,7 @@ package dk.nykredit.bank.account.exposure.rs.model;
 
 import javax.ws.rs.core.UriInfo;
 
-import dk.nykredit.bank.account.exposure.rs.EventServiceExposure;
+import dk.nykredit.bank.account.exposure.rs.EventFeedMetadataServiceExposure;
 import dk.nykredit.jackson.dataformat.hal.HALLink;
 import dk.nykredit.jackson.dataformat.hal.annotation.Link;
 import dk.nykredit.jackson.dataformat.hal.annotation.Resource;
@@ -18,10 +18,10 @@ import io.swagger.annotations.ApiModelProperty;
         description = "A very simple way of delivering metadata to the consumer of a service")
 public class EventsMetadataRepresentation {
 
-    private String DEFAULT = "{\"events\": {\n" +
-            "           \"description\": \"This is a very simple non-persisted edition of the metadata for events on account\","+
-            "           \"purpose\": \"To show that it is easy to deliver information as part of the service and not only in the API docs\""+
-            "           \"supported-versions\": \"This is only in the current initial version 1\""+
+    private static final String DEFAULT = "{\"events\": {\n" +
+            "           \"description\": \"This is a very simple non-persisted edition of the metadata for events on account\"," +
+            "           \"purpose\": \"To show that it is easy to deliver information as part of the service and not only in the API docs\"" +
+            "           \"supported-versions\": \"This is only in the current initial version 1\"" +
             "}}";
 
     @Link
@@ -29,23 +29,23 @@ public class EventsMetadataRepresentation {
 
     private String metadata;
 
-    @ApiModelProperty(
-            access = "public",
-            name = "self",
-            notes = "link to the reconciled transaction list.")
-    public HALLink getSelf() {
-        return self;
-    }
-
     /**
       * @param metadata must be formatted as valid JSON, rig now it is ignored and replaced with a static JSON document
      */
     public EventsMetadataRepresentation(String metadata, UriInfo uriInfo) {
         this.metadata = DEFAULT;
         this.self = new HALLink.Builder(uriInfo.getBaseUriBuilder()
-                .path(EventServiceExposure.class)
+                .path(EventFeedMetadataServiceExposure.class)
                 .build())
                 .build();
+    }
+
+    @ApiModelProperty(
+            access = "public",
+            name = "self",
+            notes = "link to the reconciled transaction list.")
+    public HALLink getSelf() {
+        return self;
     }
 
     @ApiModelProperty(

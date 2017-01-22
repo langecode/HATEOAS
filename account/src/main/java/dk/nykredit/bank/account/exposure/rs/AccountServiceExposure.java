@@ -76,11 +76,12 @@ public class AccountServiceExposure {
     @GET
     @Produces({"application/hal+json"})
     @ApiOperation(value = "lists accounts", response = AccountsRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                                    @AuthorizationScope( scope = "advisor", description = "allows getting every account")
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")
                             }
                     )
             },
+            produces = "application/hal+json, application/hal+json;concept=accountoverview;v=1",
             notes = "List all accounts in a default projection, which is AccountOverview version 1" +
                     "Supported projections and versions are: " +
                     "AccountOverview in version 1 " +
@@ -94,10 +95,11 @@ public class AccountServiceExposure {
     @Path("{regNo}-{accountNo}")
     @Produces({"application/hal+json"})
     @ApiOperation(value = "gets the information from a single account", response = AccountRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
+                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
             },
+            produces = "application/hal+json, application/hal+json;concept=account;v=1, application/hal+json;concept=account;v=2",
             notes = "obtain a single account back in a default projection, which is Account version 2" +
                     " Supported projections and versions are:" +
                     " AccountSparse in version1 and Account in version 2" +
@@ -125,6 +127,8 @@ public class AccountServiceExposure {
                     @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
             },
             notes = "PUT is used to create a new account from scratch and may be used to alter the name of the account",
+            consumes = "application/json",
+            produces = "application/hal+json, application/hal+json;concept=account;v=1, application/hal+json;concept=account;v=2",
             nickname = "updateAccount")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Could not update or create the account", response = ErrorRepresentation.class),
@@ -159,11 +163,11 @@ public class AccountServiceExposure {
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("concept", "account");
-        parameters.put("v", "1.0.0");
+        parameters.put("v", "2");
 
         return Response.created(URI.create(uriInfo.getPath()))
                 .entity(new AccountRepresentation(a, uriInfo))
-                .cacheControl(cc).expires(Date.from(CurrentTime.now().toInstant().plusSeconds(maxAge)))
+                .cacheControl(cc).expires(Date.from(CurrentTime.now().plusSeconds(maxAge)))
                 .status(201)
                 .type(EntityResponseBuilder.getMediaType(parameters, true))
                 .build();
@@ -196,10 +200,10 @@ public class AccountServiceExposure {
                                                   @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
                                                   @Context UriInfo uriInfo, @Context Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
-        LOGGER.info("Usage - application/hal+json;concept=Account;v=1.0.0  or application/hal+json+account+1");
+        LOGGER.info("Usage - application/hal+json;concept=account;v=1");
         return new EntityResponseBuilder<>(account, acc -> new AccountSparseRepresentation(acc, uriInfo))
-                .name(CONCEPT_NAME)
-                .version("1.0.0")
+                .name("account")
+                .version("1")
                 .maxAge(120)
                 .build(request);
     }
@@ -220,10 +224,10 @@ public class AccountServiceExposure {
                                                   @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
                                                   @Context UriInfo uriInfo, @Context Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
-        LOGGER.info("Usage - application/hal+json;concept=Account;v=2.0.0 or application/hal+json+account+2");
+        LOGGER.info("Usage - application/hal+json;concept=account;v=2");
         return new EntityResponseBuilder<>(account, acc -> new AccountRepresentation(acc, acc.getTransactions(), uriInfo))
-                .name(CONCEPT_NAME)
-                .version(CONCEPT_VERSION)
+                .name("account")
+                .version("2")
                 .maxAge(60)
                 .build(request);
     }

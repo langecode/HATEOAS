@@ -18,11 +18,11 @@ public class CapabilityParser<C> {
     private final Function<String, Optional<C>> factory;
     private final BiPredicate<C, C> duplicate;
     
-    protected CapabilityParser(String regex, Function<String, Optional<C>> factory) {
+    public CapabilityParser(String regex, Function<String, Optional<C>> factory) {
         this(regex, factory, (c1, c2) -> false);
     }
     
-    protected CapabilityParser(String regex, Function<String, Optional<C>> factory, BiPredicate<C, C> duplicate) {
+    public CapabilityParser(String regex, Function<String, Optional<C>> factory, BiPredicate<C, C> duplicate) {
         this.pattern = Pattern.compile(regex);
         this.factory = factory;
         this.duplicate = duplicate;
@@ -40,9 +40,9 @@ public class CapabilityParser<C> {
         String sanitized = Sanitizer.sanitize(capability, true, true);
         List<String> tokens = Arrays.asList(sanitized.split("\\|"));
         return tokens.stream()
-                .map(t -> factory.apply(t))
-                .filter(o -> o.isPresent())
-                .map(o -> o.get())
+                .map(factory::apply)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(ArrayList::new, this::accumulate, ArrayList::addAll);
     }
     

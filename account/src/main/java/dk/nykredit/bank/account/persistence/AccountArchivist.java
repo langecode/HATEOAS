@@ -109,7 +109,7 @@ public class AccountArchivist {
      * @param sortAs     attribute to sort by, default is time and supports sorting by amount
      */
     public List<Transaction> getTransactions(String regNo, String accountNo, Optional<Element> elementSet, Optional<Interval> withIn,
-            List< Sort> sortAs) {
+            List<Sort> sortAs) {
         StringBuilder qs = new StringBuilder("select t from Transaction t where t.account.regNo=:regNo and t.account.accountNo=:accountNo");
         if (withIn.isPresent()) {
             qs.append(" and t.lastModifiedTime>:startsAt and t.lastModifiedTime<:endsAt");
@@ -155,7 +155,7 @@ public class AccountArchivist {
     }
 
     public List<Event> findEvents(Optional<Interval> withIn) {
-        StringBuilder qs = new StringBuilder ("select e from Event e");
+        StringBuilder qs = new StringBuilder("select e from Event e");
         if (withIn.isPresent()) {
             qs.append(" and t.lastModifiedTime>:startsAt and t.lastModifiedTime<:endsAt");
         }
@@ -170,7 +170,7 @@ public class AccountArchivist {
     }
 
     public List<Event> getEventsForCategory(String category, Optional<Interval> withIn) {
-        StringBuilder qs = new StringBuilder ("select e from Event e where e.category=:category");
+        StringBuilder qs = new StringBuilder("select e from Event e where e.category=:category");
         if (withIn.isPresent()) {
             qs.append(" and t.lastModifiedTime>:startsAt and t.lastModifiedTime<:endsAt");
         }

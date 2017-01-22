@@ -21,8 +21,8 @@ import io.swagger.annotations.ApiModelProperty;
  * Represents a set of accounts from the REST service exposure in this default projection.
  */
 @Resource
-@ApiModel(value="Accounts",
-        description="a list of Accounts in default projection")
+@ApiModel(value = "Accounts",
+        description = "a list of Accounts in default projection")
 public class AccountsRepresentation {
 
     @Link

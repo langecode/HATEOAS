@@ -1,5 +1,6 @@
 package dk.nykredit.hateoas;
 
+import dk.nykredit.bank.account.exposure.rs.EventFeedMetadataServiceExposure;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +27,8 @@ public class ServicesApplication extends Application {
                         AccountServiceExposure.class,
                         TransactionServiceExposure.class,
                         ReconciledTransactionServiceExposure.class,
-                        EventServiceExposure.class)
+                        EventServiceExposure.class,
+                        EventFeedMetadataServiceExposure.class)
         );
         JaxRsRuntime.configure(classes);
         return classes;

@@ -54,14 +54,15 @@ public class ReconciledTransactionServiceExposure {
     @Produces({ "application/hal+json" })
     @ApiOperation(value = "obtain reconciled transactions (added API capabilities not though not implemented)",
             response = ReconciledTransactionsRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope( scope = "advisor", description = "allows getting every account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
+                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
             },
             tags = {"select", "sort", "elements", "interval", "filter", "embed", "decorator", "reconciled"},
             notes = "obtain a list of all reconciled transactions from an account" +
             "the reconciled transactions are user controlled checks and notes for transactions " +
             "such as - Yes I have verified that this transaction was correct and thus it is reconciled",
+            produces = "application/hal+json, application/hal+json;concept=reconciledtransactions;v=1",
             nickname = "listReconciledTransactions")
     public Response list(@PathParam("regNo") String regNo, @PathParam("accountNo") String accountNo,
                          @Context UriInfo uriInfo, @Context Request request) {
@@ -76,6 +77,7 @@ public class ReconciledTransactionServiceExposure {
             authorizations = {@Authorization( value = "oauth",scopes = {
                     @AuthorizationScope( scope = "customer", description = "allows getting own account")})
             },
+            produces = "application/hal+json, application/hal+json;concept=reconciledtransaction;v=1",
             nickname = "getReconciledTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No reconciled transaction found.")
@@ -91,15 +93,14 @@ public class ReconciledTransactionServiceExposure {
     @Consumes(MediaType.APPLICATION_JSON)
     @LogDuration(limit = 50)
     @ApiOperation(value = "Create new or update reconciled transaction", response = ReconciledTransactionRepresentation.class,
-            authorizations = {@Authorization( value = "oauth",scopes = {
-                    @AuthorizationScope( scope = "system", description = "allows getting coOwned account")})
+            authorizations = {@Authorization(value = "oauth", scopes = {
+                    @AuthorizationScope(scope = "system", description = "allows getting coOwned account")})
             },
             notes = "reconciled transactions are user controlled checks and notes for transactions" +
                     "such as - Yes I have verified that this transaction was correct and thus it is reconciled",
             nickname = "updateReconciledTransaction")
     @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "No updating possible", response = ErrorRepresentation.class)
-    })
+            @ApiResponse(code = 400, message = "No updating possible", response = ErrorRepresentation.class)})
     public Response createOrUpdate(@PathParam("regNo") @Pattern(regexp = "^[0-9]{4}$") String regNo,
                                    @PathParam("accountNo") @Pattern(regexp = "^[0-9]+$") String accountNo,
                                    @PathParam("id") String id,
@@ -116,10 +117,10 @@ public class ReconciledTransactionServiceExposure {
         ReconciledTransaction reconciled = new ReconciledTransaction(rtx.getReconciled().contains("true"), rtx.getNote(), tx);
         archivist.save(reconciled);
         return new EntityResponseBuilder<>(reconciled.getTransaction(), t -> new ReconciledTransactionRepresentation(reconciled, t, uriInfo))
-                    .name(CONCEPT_NAME)
-                    .version(CONCEPT_VERSION)
-                    .maxAge(60)
-                    .build(request);
+                .name("reconciledtransaction")
+                .version("1")
+                .maxAge(60)
+                .build(request);
     }
 
     @GET
@@ -129,9 +130,11 @@ public class ReconciledTransactionServiceExposure {
                                           @Context UriInfo uriInfo, @Context Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
         return new EntityResponseBuilder<>(account.getReconciledTransactions(),
-                transactions -> new ReconciledTransactionsRepresentation(account, uriInfo))
-                .maxAge(10)
-                .build(request);
+            transactions -> new ReconciledTransactionsRepresentation(account, uriInfo))
+            .name("reconciledtransactions")
+            .version("1")
+            .maxAge(10)
+            .build(request);
     }
 
     @GET
@@ -150,11 +153,11 @@ public class ReconciledTransactionServiceExposure {
                              @Context UriInfo uriInfo, @Context Request request) {
         ReconciledTransaction reconciledTransaction = archivist.getReconciledTransaction(regNo, accountNo, id);
         return new EntityResponseBuilder<>(reconciledTransaction,
-                rt -> new ReconciledTransactionRepresentation(rt, rt.getTransaction(), uriInfo))
-                .maxAge(24 * 60 * 60)
-                .name(CONCEPT_NAME)
-                .version(CONCEPT_VERSION)
-                .build(request);
+            rt -> new ReconciledTransactionRepresentation(rt, rt.getTransaction(), uriInfo))
+            .maxAge(24 * 60 * 60)
+            .name("reconciledtransaction")
+            .version("1")
+            .build(request);
     }
 
     private boolean defined(Transaction tx) {

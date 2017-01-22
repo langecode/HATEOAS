@@ -21,7 +21,8 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Resource
 @ApiModel(value = "ReconciledTransactions",
-        description = "A list containing the mutable decorator instances each having link to their immutable counterpart transaction to keep its immutability")
+        description = "A list containing the mutable decorator instances each having link to their immutable " +
+                "counterpart transaction to keep its immutability")
 public class ReconciledTransactionsRepresentation {
     @EmbeddedResource("reconciledTransactions")
     private Collection<ReconciledTransactionRepresentation> rtxs;

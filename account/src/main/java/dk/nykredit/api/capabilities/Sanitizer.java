@@ -6,7 +6,7 @@ package dk.nykredit.api.capabilities;
 public class Sanitizer {
     private static final String[] SUSPICIOUS_CONTENT = {"\'", "\"", "\\", "%", "\\%", "\\_", "\0", "\b", "\n", "\t", "\r", "\\Z", "?", "#"};
 
-    private Sanitizer(){
+    private Sanitizer() {
         // reduce scope to avoid default construction
     }
 

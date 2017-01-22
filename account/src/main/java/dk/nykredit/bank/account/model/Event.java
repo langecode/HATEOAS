@@ -4,14 +4,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import dk.nykredit.nic.persistence.jpa.AbstractAuditable;
 import dk.nykredit.time.CurrentTime;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -46,8 +53,11 @@ public class Event extends AbstractAuditable {
     @Column(name = "SID", length = 36, nullable = false, columnDefinition = "CHAR(36)")
     private String id;
 
+    /**
+     * using a database generated sequence is not cloud capable
+     */
     @Column(name = "SEQ", nullable = false, columnDefinition = "BIGINT")
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="sequencer")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequencer")
     private Long sequence;
 
     @Column(name = "TIME", nullable = false)
@@ -63,7 +73,7 @@ public class Event extends AbstractAuditable {
     private String origin;
 
     @Transient
-    private ZonedDateTime transientTime;
+    private Instant transientTime;
 
     protected Event() {
         // Required by JPA
@@ -79,14 +89,14 @@ public class Event extends AbstractAuditable {
     /**
      * @param origin is a url pointing to the origin of the event
      */
-    public Event(URI origin, ZonedDateTime time) {
+    public Event(URI origin, Instant time) {
         this(origin, "default", time);
     }
 
     /**
      * @param origin is a url pointing to the origin of the event
      */
-    public Event(URI origin, String category, ZonedDateTime time) {
+    public Event(URI origin, String category, Instant time) {
         this(UUID.randomUUID().toString(), origin, time, "", category);
     }
 
@@ -101,8 +111,8 @@ public class Event extends AbstractAuditable {
      * @param sid    a controlled human readable and url capable identifier
      * @param origin is a url pointing to the origin of the event
      */
-    public Event(String sid, URI origin, ZonedDateTime time, String information, String category) {
-        this.time = new Timestamp(time.toInstant().toEpochMilli());
+    public Event(String sid, URI origin, Instant time, String information, String category) {
+        this.time = new Timestamp(time.toEpochMilli());
         this.transientTime = time;
         this.id = sid;
         this.origin = origin.getPath();
@@ -113,7 +123,7 @@ public class Event extends AbstractAuditable {
         // for simplicity it is just a unique id here. The reason for having a technical
         // id here is the ability to merge og split events according to needs going forward.
         if (noSequence()) {
-           sequence = time.toInstant().toEpochMilli() + time.getNano();
+            sequence = time.toEpochMilli() + time.getNano();
         }
     }
 
@@ -125,11 +135,11 @@ public class Event extends AbstractAuditable {
         return sequence;
     }
 
-    public ZonedDateTime getTime() {
+    public Instant getTime() {
         if (transientTime != null) {
             return transientTime;
         } else {
-            transientTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(this.time.getTime()), ZoneId.of("UTC"));
+            transientTime = Instant.ofEpochMilli(this.time.getTime());
             return transientTime;
         }
     }
