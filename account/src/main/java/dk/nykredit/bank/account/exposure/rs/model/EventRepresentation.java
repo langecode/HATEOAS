@@ -57,8 +57,7 @@ public class EventRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "id",
-            notes = "a semantic (here shown as UUID) identifier for the event.",
-            value = "Readable and Writeable")
+            value = "a semantic identifier for the event.")
     public String getId() {
         return id;
     }
@@ -66,8 +65,7 @@ public class EventRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "time",
-            notes = "the human readable time of when the event occurred.",
-            value = "Readable and Writeable")
+            value = "the human readable time of when the event occurred.")
     public String getTime() {
         return time;
     }
@@ -76,8 +74,7 @@ public class EventRepresentation {
             access = "public",
             name = "sequence",
             example = "1",
-            notes = "the sequence - in this example to show that time and sequence can be used for idempotency.",
-            value = "Readable and Writeable")
+            value = "the sequence - in this example to show that time and sequence can be used for idempotency.")
     public String getSequence() {
         return sequence;
     }
@@ -86,8 +83,8 @@ public class EventRepresentation {
             access = "public",
             name = "category",
             example = "1234-12345678",
-            notes = "the category - in which the event has been grouped into. Default is (default) if no category has been set.",
-            value = "Readable and Writeable")
+            value = "the category - in which the event has been grouped into.",
+            notes = "Default is (default) if no category has been set.")
     public String getCategory() {
         return category;
     }
@@ -103,7 +100,7 @@ public class EventRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "self",
-            notes = "link to the event itself.")
+            notes = "notes on the - link to the event itself.")
     public HALLink getSelf() {
         return self;
     }
@@ -111,7 +108,7 @@ public class EventRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "metadata",
-            notes = "link to the event metadata.")
+            notes = "metadata about the event and feed.")
     public HALLink getMetadata() {
         return metadata;
     }

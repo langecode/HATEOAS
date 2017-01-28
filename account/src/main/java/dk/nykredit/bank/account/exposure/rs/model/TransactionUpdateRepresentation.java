@@ -27,8 +27,7 @@ public class TransactionUpdateRepresentation {
             name = "description",
             required = true,
             example = "Starbucks Coffee",
-            notes = "the human readable description of the transaction.",
-            value = "Readable and Writeable")
+            value = "the human readable description of the transaction.")
     public String getDescription() {
         return description;
     }
@@ -38,8 +37,7 @@ public class TransactionUpdateRepresentation {
             name = "amount",
             required = true,
             example = "123.45",
-            notes = "the amount - in this example without currency.",
-            value = "Readable and Writeable")
+            value = "the amount - in this example without currency.")
     public String getAmount() {
         return amount;
     }

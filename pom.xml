@@ -26,9 +26,11 @@
         <commons-io.version>2.5</commons-io.version>
         <commons-lang3.version>3.4</commons-lang3.version>
         <dk.nykredit.jackson.dataformat.version>1.0.1</dk.nykredit.jackson.dataformat.version>
+        <dk.nykredit.api.version>1.0.0</dk.nykredit.api.version>
+        <dk.nykredit.swagger.version>1.0.0</dk.nykredit.swagger.version>
         <google.http-client.version>1.22.0</google.http-client.version>
         <google.oauth-client.version>1.22.0</google.oauth-client.version>
-        <io.swagger.version>1.5.8</io.swagger.version>
+        <io.swagger.version>1.5.12</io.swagger.version>
         <javaee-web-api.version>7.0</javaee-web-api.version>
         <javax.servlet.version>3.0.1</javax.servlet.version>
         <junit.version>4.11</junit.version>
@@ -40,7 +42,7 @@
         <org.jboss.logging.version>3.3.0.Final</org.jboss.logging.version>
         <org.mockito.version>2.2.29</org.mockito.version>
         <org.slf4j.version>1.7.7</org.slf4j.version>
-        <org.glassfish.jersey.version>2.23.2</org.glassfish.jersey.version>
+        <org.glassfish.jersey.version>2.25</org.glassfish.jersey.version>
         <org.javassist.version>3.20.0-GA</org.javassist.version>
         <resteasy.version>3.0.10.Final</resteasy.version>
         <dk.nykredit.maven.plugins.version>4.0.36</dk.nykredit.maven.plugins.version>
@@ -109,6 +111,11 @@
                 <groupId>javax</groupId>
                 <artifactId>javaee-web-api</artifactId>
                 <version>${javaee-web-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dk.nykredit.api</groupId>
+                <artifactId>capabilities</artifactId>
+                <version>${dk.nykredit.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
@@ -415,7 +422,7 @@
                                         cargo.datasource.url=jdbc:h2:file:./account;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE|
                                         cargo.datasource.username=sa|
                                         cargo.datasource.password=sa|
-                                        cargo.datasoruce.properties=|
+                                        cargo.datasource.properties=|
                                         cargo.datasource.transactionsupport=XA_TRANSACTION
                                     </cargo.datasource.datasource.account>
                                 </properties>

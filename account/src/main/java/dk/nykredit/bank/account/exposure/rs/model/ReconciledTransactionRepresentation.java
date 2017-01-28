@@ -53,8 +53,7 @@ public class ReconciledTransactionRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "id",
-            notes = "a semantic (here shown as UUID) identifier for the transaction.",
-            value = "Read-only")
+            value = "a semantic (here shown as UUID) identifier for the transaction.")
 
     public String getId() {
         return id;
@@ -63,8 +62,7 @@ public class ReconciledTransactionRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "note",
-            notes = "contains information relevant to the reconciled decorated transaction.",
-            value = "Read-only")
+            value = "contains information relevant to the reconciled decorated transaction.")
     public String getNote() {
         return note;
     }
@@ -72,8 +70,7 @@ public class ReconciledTransactionRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "reconciled",
-            notes = "signals whether the transaction is reconciled or not.",
-            value = "Read-only")
+            value = "signals whether the transaction is reconciled or not.")
     public Boolean getReconciled() {
         return reconciled;
     }

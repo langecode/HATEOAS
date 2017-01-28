@@ -55,8 +55,7 @@ public class AccountSparseRepresentation {
             access = "public",
             name = "regno",
             example = "1234",
-            notes = "the registration number preceeding the account  number.",
-            value = "Read-only")
+            value = "the registration number preceeding the account  number.")
     public String getRegNo() {
         return regNo;
     }
@@ -65,8 +64,7 @@ public class AccountSparseRepresentation {
             access = "public",
             name = "accountno",
             example = "12345678",
-            notes = "the account  number.",
-            value = "Read-only")
+            value = "the account  number.")
     public String getAccountNo() {
         return accountNo;
     }
@@ -75,8 +73,7 @@ public class AccountSparseRepresentation {
             access = "public",
             name = "name",
             example = "NemKonto",
-            notes = "the human readable name of the account.",
-            value = "Readable and Writeable")
+            value = "the human readable name of the account.")
     public String getName() {
         return name;
     }
@@ -84,7 +81,7 @@ public class AccountSparseRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "transactions",
-            notes = "link to the collection of transactions that have taken place for the account.")
+            value = "link to the collection of transactions that have taken place for the account.")
     public HALLink getTransactionsResource() {
         return transactionsResource;
     }

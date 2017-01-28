@@ -24,16 +24,18 @@ import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.time.CurrentTime;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 
 /**
  * REST exposure of metadata for events that are related to the account.
  *
  * Remark:
- *  the <code>/account-events-metadata/{category}/{id} </code> is experimental and only used for API discussions
- *  the correct implementation would be having a <code>/events/{id}</code> resource and a <code>/categories/{id}</code>
- *  resource with a relation to the events so in effect you could perceive this as  <code>/categories/{id}/events</code>
- *  where the latter part <code>"/events"</code> are a curie.
+ *  the {@code /account-events-metadata/{category}/{id} } is experimental and only used for API discussions
+ *  the correct implementation would be having a {@code "/events/{id}"} resource and a {@code "/categories/{id}"}
+ *  resource with a relation to the events so in effect you could perceive this as  {@code "/categories/{id}/events"}
+ *  where the latter part {@code "/events"} are a curie.
  *
  *
  * category - can be regNo-accountNo if the events are related to a given account and that would be the case for eg. transactions
@@ -63,16 +65,25 @@ public class EventFeedMetadataServiceExposure {
     @Produces({"application/hal+json", "application/hal+json;concept=metadata;v=1"})
     @ApiOperation(
             value = "metadata for the events endpoint", response = EventsMetadataRepresentation.class,
-            authorizations = {@Authorization(value = "Bearer")},
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
+            },
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service",
             tags = {"events"},
             produces = "application/hal+json,  application/hal+json;concept=metadata;v=1",
             nickname = "getMetadata"
-    )
+        )
+    @ApiResponses(value = {
+            @ApiResponse(code = 415, message = "Content type not supported.")
+        })
     public Response getMetadata(@HeaderParam("Accept") String accept, @Context UriInfo uriInfo, @Context Request request) {
-        return eventMetadataProducers.get(accept).getResponse(uriInfo, request);
+        return eventMetadataProducers.getOrDefault(accept, this::handleUnsupportedContentType).getResponse(uriInfo, request);
     }
 
     @LogDuration(limit = 50)
@@ -92,5 +103,10 @@ public class EventFeedMetadataServiceExposure {
     interface EventMetadataProducerMethod {
         Response getResponse(UriInfo uriInfo, Request request);
     }
+
+    Response handleUnsupportedContentType(UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
+
 
 }

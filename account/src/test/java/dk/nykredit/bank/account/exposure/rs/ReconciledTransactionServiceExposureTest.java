@@ -57,6 +57,9 @@ public class ReconciledTransactionServiceExposureTest {
         assertEquals(1, reconciledTxs.getReconciledTransactions().size());
         assertEquals("http://mock/accounts/5479-123456/reconciled-transactions", reconciledTxs.getSelf().getHref());
 
+        response = service.list("application/hal+json;concept=non.existing;type","5479", "123456", ui, request);
+        assertEquals(415,response.getStatus());
+
     }
 
     @Test
@@ -80,6 +83,9 @@ public class ReconciledTransactionServiceExposureTest {
         assertEquals(true, reconciledTx.getReconciled());
         assertEquals("http://mock/accounts/5479-123456/reconciled-transactions/" + tx.getId(), reconciledTx.getSelf().getHref());
         assertEquals("http://mock/accounts/5479-123456/transactions/" + tx.getId(), reconciledTx.getTransaction().getHref());
+
+        response = service.get("application/hal+json;concept=non.existing;type","5479", "123456", "xxx-yyy", ui, request);
+        assertEquals(415,response.getStatus());
     }
 
 }

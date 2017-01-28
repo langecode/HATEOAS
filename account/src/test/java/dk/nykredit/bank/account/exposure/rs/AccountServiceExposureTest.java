@@ -51,6 +51,10 @@ public class AccountServiceExposureTest {
 
         assertEquals(2, accounts.getAccounts().size());
         assertEquals("http://mock/accounts", accounts.getSelf().getHref());
+
+        response = service.list("application/hal+json;concept=non.existing;type",ui, request);
+        assertEquals(415,response.getStatus());
+
     }
 
     @Test
@@ -67,6 +71,10 @@ public class AccountServiceExposureTest {
         assertEquals("5479", account.getRegNo());
         assertEquals("1234", account.getAccountNo());
         assertEquals("http://mock/accounts/5479-1234", account.getSelf().getHref());
+
+        Response response = service.get("5479", "1234", "application/hal+json;concept=account;v=0", ui, request);
+        assertEquals(415,response.getStatus());
+
     }
 
     @Test

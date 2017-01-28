@@ -39,8 +39,7 @@ public class TransactionRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "id",
-            notes = "a semantic (here shown as UUID) identifier for the transaction.",
-            value = "Read-only")
+            value = "a semantic identifier for the transaction.")
     public String getId() {
         return id;
     }
@@ -49,8 +48,7 @@ public class TransactionRepresentation {
             access = "public",
             name = "description",
             example = "Starbucks Coffee",
-            notes = "the human readable description of the transaction.",
-            value = "Read-only")
+            value = "the human readable description of the transaction.")
     public String getDescription() {
         return description;
     }
@@ -59,8 +57,7 @@ public class TransactionRepresentation {
             access = "public",
             name = "amount",
             example = "123.45",
-            notes = "the amount - in this example without currency.",
-            value = "Read-only")
+            value = "the amount - in this example without currency.")
     public String getAmount() {
         return amount;
     }

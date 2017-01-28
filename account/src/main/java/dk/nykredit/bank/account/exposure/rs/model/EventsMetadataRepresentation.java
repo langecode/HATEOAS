@@ -51,8 +51,7 @@ public class EventsMetadataRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "metadata",
-            notes = "json formatted description of relevant metadata",
-            value = "Read-only")
+            value = "json formatted description of relevant metadata")
     public String getMetadata() {
         return metadata;
     }

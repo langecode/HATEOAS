@@ -14,11 +14,11 @@ import dk.nykredit.nic.core.diagnostic.DiagnosticContext;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@Resource
-@ApiModel(value="Error", description = "a simple error representation")
 /**
  * Simple Error representation
  */
+@Resource
+@ApiModel(value = "Error", description = "a simple error representation")
 public class ErrorRepresentation {
     private static final String TIME_SUBSTITUTION_KEY = "time";
     private static final String LOG_TOKEN_SUBSTITUTION_KEY = "logToken";
@@ -38,7 +38,7 @@ public class ErrorRepresentation {
         if (builder.error == null) {
             throw new IllegalArgumentException("An error code must be supplied");
         } else {
-            this.values = new LinkedHashMap();
+            this.values = new LinkedHashMap<>();
             String logToken = DiagnosticContext.getLogToken();
             this.values.put("time", builder.time);
             this.values.put("logToken", logToken);
@@ -57,8 +57,7 @@ public class ErrorRepresentation {
             access = "public",
             name = "message",
             example = "this error happened due to this situation",
-            notes = "the contents of an error in the body as information til API consumer(s).",
-            value = "Read-only")
+            value = "the contents of an error in the body as information til API consumer(s).")
     public String getMessage() {
         return this.msg;
     }
@@ -66,8 +65,7 @@ public class ErrorRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "sid",
-            notes = "the semantic id of the error.",
-            value = "Read-only")
+            value = "the semantic id of the error.")
     public String getSid() {
         return this.sid;
     }
@@ -75,8 +73,7 @@ public class ErrorRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "values",
-            notes = "a collection of validation issues which caused the error.",
-            value = "Read-only")
+            value = "a collection of validation issues which caused the error.")
     public Map<String, Object> getValues() {
         return this.values;
     }
@@ -94,19 +91,17 @@ public class ErrorRepresentation {
         return (new dk.nykredit.jackson.dataformat.hal.HALLink.Builder(uri)).title("Link to failed resource").build();
     }
 
+    /**
+     * a simple builder for errors representation
+     */
     public static class Builder {
 
         private String msg;
         private URI resourceUri;
-        private Map<String, Object> values = new LinkedHashMap();
+        private Map<String, Object> values = new LinkedHashMap<>();
         private Date time = new Date();
         private String error;
         private Object details;
-
-
-        public Builder(String error) {
-            this.error = error;
-        }
 
         public ErrorRepresentation.Builder msg(String msg) {
             this.msg = msg;

@@ -27,8 +27,7 @@ public class ReconciledTransactionUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "note",
-            notes = "contains information relevant to the reconciled decorated transaction.",
-            value = "Read-only")
+            value = "contains information relevant to the reconciled decorated transaction.")
     public String getNote() {
         return note;
     }
@@ -36,8 +35,7 @@ public class ReconciledTransactionUpdateRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "reconciled",
-            notes = "signals whether the transaction is reconciled or not.",
-            value = "Read-only")
+            value = "signals whether the transaction is reconciled or not.")
     public String getReconciled() {
         return reconciled;
     }

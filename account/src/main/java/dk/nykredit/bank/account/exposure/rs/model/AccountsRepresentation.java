@@ -51,7 +51,7 @@ public class AccountsRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "accounts",
-            notes = "account list.")
+            value = "account list.")
     public Collection<AccountRepresentation> getAccounts() {
         return Collections.unmodifiableCollection(accounts);
     }

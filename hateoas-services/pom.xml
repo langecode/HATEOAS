@@ -56,7 +56,10 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -208,60 +211,62 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.github.kongchen</groupId>
+                <groupId>dk.nykredit.swagger</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
-                <version>${swagger-maven-plugin.version}</version>
+                <version>${dk.nykredit.swagger.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>dk.nykredit.swagger</groupId>
                         <artifactId>swagger-hal</artifactId>
                         <version>${swagger-hal.version}</version>
                     </dependency>
+                         <dependency>
+                             <groupId>dk.nykredit.hateoas</groupId>
+                             <artifactId>account</artifactId>
+                             <version>${project.version}</version>
+                         </dependency>
+                         <dependency>
+                             <groupId>dk.nykredit.hateoas</groupId>
+                             <artifactId>hateoas-services</artifactId>
+                             <version>${project.version}</version>
+                         </dependency>
                 </dependencies>
                 <configuration>
-                    <apiSources>
-                        <apiSource>
-                            <springmvc>false</springmvc>
-                            <locations>dk.nykredit.*</locations>
-                            <schemes>https</schemes>
-                            <host>hateoas.services.nykredit.dk</host>
-                            <basePath>/hateoas</basePath>
-                            <descriptionFile>
-                                ./descriptions.md
-                            </descriptionFile>
-                            <info>
-                                <title>${project.parent.name}</title>
-                                <version>${project.parent.version}</version>
-                                <termsOfService>
-                                    he terms of using the service is as follows,
-                                    the contract found at
-                                    https://sample-bank.dk/services/contracts/2345678
-                                    and states the general terms for using this service.
-                                    Consumers can create their own individual contract and terms
-                                    for usage at https://sample-bank.dk/services/consumers
-                                </termsOfService>
-                                <contact>
-                                    <email>sample@sample-bank.dk</email>
-                                    <name>Sample Bank Contact Name</name>
-                                    <url>https://www.sample-bank.dk</url>
-                                </contact>
-                                <license>
-                                    <url>https://www.sample-bank.dk/licenses/LICENSE.html</url>
-                                    <name>(C) Sample-Bank 2016</name>
-                                </license>
-                            </info>
-                            <securityDefinitions>
-                                <securityDefinition>
-                                    <json>/securitydefinitions.json</json>
-                                </securityDefinition>
-                            </securityDefinitions>
-                            <jsonExampleValues>true</jsonExampleValues>
-                            <swaggerDirectory>${project.build.directory}/api</swaggerDirectory>
-                            <modelConverters>
-                                <modelConverter>dk.nykredit.swagger.HALModelConverter</modelConverter>
-                            </modelConverters>
-                        </apiSource>
-                    </apiSources>
+                    <resourcePackages>
+                        <resourcePackage>dk.nykredit.bank.account.exposure.rs</resourcePackage>
+                        <resourcePackage>dk.nykredit.hateoas</resourcePackage>
+                    </resourcePackages>
+                    <swaggerConfig>
+                        <descriptionFile>
+                            ./descriptions.md
+                        </descriptionFile>
+                        <info>
+                            <title>${project.parent.name}</title>
+                            <version>${project.parent.version}</version>
+                            <termsOfService>
+                                he terms of using the service is as follows,
+                                the contract found at
+                                https://sample-bank.dk/services/contracts/2345678
+                                and states the general terms for using this service.
+                                Consumers can create their own individual contract and terms
+                                for usage at https://sample-bank.dk/services/consumers
+                            </termsOfService>
+                            <contact>
+                                <email>sample@sample-bank.dk</email>
+                                <name>Sample Bank Contact Name</name>
+                                <url>https://www.sample-bank.dk</url>
+                            </contact>
+                            <license>
+                                <url>https://www.sample-bank.dk/licenses/LICENSE.html</url>
+                                <name>(C) Sample-Bank 2017</name>
+                            </license>
+                        </info>
+                    </swaggerConfig>
+                    <outputDirectory>${project.build.directory}/api</outputDirectory>
+                    <outputFormats>
+                        <outputFormat>JSON</outputFormat>
+                        <outputFormat>YAML</outputFormat>
+                    </outputFormats>
                 </configuration>
                 <executions>
                     <execution>

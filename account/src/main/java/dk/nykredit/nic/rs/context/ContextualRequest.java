@@ -25,7 +25,7 @@ public abstract class ContextualRequest {
         }
 
         public ContextualRequest getContextualRequest(HttpServletRequest request) {
-             return new StubbedContextualRequest(request, stubbedContext);
+            return new StubbedContextualRequest(request, stubbedContext);
 
         }
     }

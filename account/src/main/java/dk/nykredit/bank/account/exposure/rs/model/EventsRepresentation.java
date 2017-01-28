@@ -45,7 +45,7 @@ public class EventsRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "events",
-            notes = "the list of events.")
+            value = "the list of events.")
     public Collection<EventRepresentation> getEvents() {
         return Collections.unmodifiableCollection(events);
     }

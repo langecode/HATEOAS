@@ -8,9 +8,7 @@ The suggested approach is firstname-middlename-familyname-ddMM-sequencenumber
 
 #### Example:
 
-    hans-p-hansen-0112 the initial created Hans P Hansen born on the 1st of December
-    hans-p-hansen-0112-1 the second created Hans P Hansen born on the 1st of December
-    hans-p-hansen-0112-94 the 95th created Hans P Hansen born on the 1st of December
- 
-    mike-hansson-0309 the initially created Mike Hansson born on the 3rd of September
- 
+- `hans-p-hansen-0112` the initial created Hans P Hansen born on the 1st of December
+- `hans-p-hansen-0112-1` the second created Hans P Hansen born on the 1st of December
+- `hans-p-hansen-0112-94` the 95th created Hans P Hansen born on the 1st of December
+- `mike-hansson-0309` the initially created Mike Hansson born on the 3rd of September

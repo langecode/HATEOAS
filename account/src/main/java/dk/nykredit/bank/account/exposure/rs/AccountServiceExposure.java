@@ -1,5 +1,6 @@
 package dk.nykredit.bank.account.exposure.rs;
 
+
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,9 +46,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.ResponseHeader;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,38 +96,51 @@ public class AccountServiceExposure {
     @GET
     @Produces({"application/hal+json", "application/hal+json;concept=accountoverview;v=1"})
     @ApiOperation(value = "lists accounts", response = AccountsRepresentation.class,
-            authorizations = {@Authorization(value = "oauth", scopes = {
-                                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")
-                            }
-                    )
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
             },
+            extensions = {@Extension(name = "roles", properties = {
+                    @ExtensionProperty(name = "advisor", value = "advisors are allowed getting every account"),
+                    @ExtensionProperty(name = "customer", value = "customer only allowed getting own accounts")}
+            )},
             produces = "application/hal+json, application/hal+json;concept=accountoverview;v=1",
             notes = "List all accounts in a default projection, which is AccountOverview version 1" +
                     "Supported projections and versions are: " +
-                    "account overview in version 1 which means the Accept header for the default version is " +
-                    "application/hal+json;concept=accountoverview;v=1.... " +
-                    "The format for the default version is {....}",
-            nickname = "listAccounts"
-            )
+                    "AccountOverview in version 1 " +
+                    "The Accept header for the default version is application/hal+json;concept=AccountOverview;v=1.0.0.... " +
+                    "The format for the default version is {....}", nickname = "listAccounts")
+    @ApiResponses(value = {
+            @ApiResponse(code = 415, message = "Content type not supported.")
+        })
     public Response list(@HeaderParam("Accept") String accept, @Context UriInfo uriInfo, @Context Request request) {
-        return accountsProducers.get(accept).getResponse(uriInfo, request);
+        return accountsProducers.getOrDefault(accept, this::handleUnsupportedContentType).getResponse(uriInfo, request);
     }
 
     @GET
     @Path("{regNo}-{accountNo}")
     @Produces({"application/hal+json", "application/hal+json;concept=account;v=1", "application/hal+json;concept=account;v=2"})
     @ApiOperation(value = "gets the information from a single account", response = AccountRepresentation.class,
-            authorizations = {@Authorization(value = "oauth", scopes = {
-                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
             },
+            extensions = {@Extension(name = "roles", properties = {
+                    @ExtensionProperty(name = "customer", value = "customer allows getting own account"),
+                    @ExtensionProperty(name = "advisor", value = "advisor allows getting every account")}
+            )},
             produces = "application/hal+json, application/hal+json;concept=account;v=1, application/hal+json;concept=account;v=2",
             notes = "obtain a single account back in a default projection, which is Account version 2" +
                     " Supported projections and versions are:" +
                     " AccountSparse in version1 and Account in version 2" +
-                    " The format of the default version is .... - The Accept Header is not marked as required in the swagger",
-            nickname = "listAccounts"
-            )
+                    " The format of the default version is .... - The Accept Header is not marked as required in the " +
+                    "swagger - but it is needed - we are working on a solution to that", nickname = "getAccount")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No account found.")
             })
@@ -135,7 +149,7 @@ public class AccountServiceExposure {
                         @HeaderParam("Accept") String accept,
                         @Context UriInfo uriInfo, @Context Request request) {
         LOGGER.info("Default version of account collected");
-        return accountProducers.get(accept).getResponse(regNo, accountNo, uriInfo, request);
+        return accountProducers.getOrDefault(accept, this::handleUnsupportedContentType).getResponse(regNo, accountNo, uriInfo, request);
     }
 
     @PUT
@@ -145,17 +159,25 @@ public class AccountServiceExposure {
     @Consumes("application/json")
     @LogDuration(limit = 50)
     @ApiOperation(value = "Create new or update existing account", response = AccountRepresentation.class,
-            authorizations = {@Authorization(value = "oauth", scopes = {
-                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope(scope = "system", description = "allows getting coOwned account"),
-                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
             },
+            extensions = {@Extension(name = "roles", properties = {
+                    @ExtensionProperty(name = "customer", value = "customer allows getting own account"),
+                    @ExtensionProperty(name = "system", value = "system allows getting coOwned account"),
+                    @ExtensionProperty(name = "advisor", value = "advisor allows getting every account")
+            })},
             notes = "PUT is used to create a new account from scratch and may be used to alter the name of the account",
             consumes = "application/json",
             produces = "application/hal+json, application/hal+json;concept=account;v=1, application/hal+json;concept=account;v=2",
             nickname = "updateAccount")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Could not update or create the account", response = ErrorRepresentation.class),
+            @ApiResponse(code = 415, message = "The content-Type was not supported"),
             @ApiResponse(code = 201, message = "New Account Created", response = AccountRepresentation.class,
                     responseHeaders = {
                             @ResponseHeader(name = "Location", description = "a link to the created resource"),
@@ -202,7 +224,6 @@ public class AccountServiceExposure {
                 .build(request);
     }
 
-
     @LogDuration(limit = 50)
     Response getServiceGeneration1Version1(String regNo, String accountNo, UriInfo uriInfo, Request request) {
         Account account = archivist.getAccount(regNo, accountNo);
@@ -231,6 +252,14 @@ public class AccountServiceExposure {
 
     interface AccountProducerMethod {
         Response getResponse(String regNo, String accountNo, UriInfo uriInfo, Request request);
+    }
+
+    Response handleUnsupportedContentType(String regNo, String accountNo, UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
+
+    Response handleUnsupportedContentType(UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
     }
 
 }

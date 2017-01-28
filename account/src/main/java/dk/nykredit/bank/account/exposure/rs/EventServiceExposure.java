@@ -76,14 +76,24 @@ public class EventServiceExposure {
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service",
-            authorizations = {@Authorization(value = "Bearer"), @Authorization(value = "oauth")},
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
+            },
             tags = {"interval", "events"},
             produces = "application/hal+json,  application/hal+json;concept=events;v=1",
             nickname = "listAllEvents"
-    )
+        )
+    @ApiResponses(value = {
+            @ApiResponse(code = 415, message = "Content type not supported.")
+        })
     public Response listAll(@HeaderParam("Accept") String accept, @QueryParam("interval") String interval,
                          @Context UriInfo uriInfo, @Context Request request) {
-        return eventsProducers.get(accept).getResponse(interval, uriInfo, request);
+        return eventsProducers.getOrDefault(accept, this::handleUnsupportedContentType)
+                .getResponse(interval, uriInfo, request);
     }
 
 
@@ -94,15 +104,25 @@ public class EventServiceExposure {
             notes = " the events are signalled by this resource as this this is the authoritative resource for all events that " +
                     "subscribers to the account service should be able to listen for and react to. In other words this is the authoritative" +
                     "feed for the account service, allowing for subscribers to have these grouped into categories",
-            authorizations = {@Authorization(value = "Bearer"), @Authorization(value = "oauth")},
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
+            },
             tags = {"interval", "events"},
             produces = "application/hal+json,  application/hal+json;concept=eventcategory;v=1",
             nickname = "getEventsByCategory"
-    )
+        )
+    @ApiResponses(value = {
+            @ApiResponse(code = 415, message = "Content type not supported.")
+        })
     public Response getByCategory(@HeaderParam("Accept") String accept, @PathParam("category") String category,
                                 @QueryParam("interval") String interval,
                                 @Context UriInfo uriInfo, @Context Request request) {
-        return eventCategoryProducers.get(accept).getResponse(category, interval, uriInfo, request);
+        return eventCategoryProducers.getOrDefault(accept, this::handleUnsupportedContentType)
+                .getResponse(category, interval, uriInfo, request);
     }
 
     @GET
@@ -112,16 +132,25 @@ public class EventServiceExposure {
     @ApiOperation(
             value = "obtain the individual events from an account", response = EventRepresentation.class,
             notes = "the event her is immutable and thus can be cached for a long time",
-            authorizations = {@Authorization(value = "Bearer"), @Authorization(value = "oauth")},
+            authorizations = {
+                @Authorization(value = "oauth2", scopes = {}),
+                @Authorization(value = "oauth2-cc", scopes = {}),
+                @Authorization(value = "oauth2-ac", scopes = {}),
+                @Authorization(value = "oauth2-rop", scopes = {}),
+                @Authorization(value = "Bearer")
+            },
             tags = {"immutable", "events"},
             produces = "application/hal+json,  application/hal+json;concept=event;v=1",
             nickname = "getEvent")
     @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "No event found.")
+            @ApiResponse(code = 404, message = "No event found."),
+            @ApiResponse(code = 415, message = "Content type not supported.")
             })
-    public Response getSingle(@HeaderParam("Accept") String accept, @PathParam("category")String category, @PathParam("id")String id,
+    public Response getSingle(@HeaderParam("Accept") String accept, @PathParam("category")String category,
+                              @PathParam("id")String id,
                               @Context UriInfo uriInfo, @Context Request request) {
-        return eventProducers.get(accept).getResponse(category, id, uriInfo, request);
+        return eventProducers.getOrDefault(accept, this::handleUnsupportedContentType)
+                .getResponse(category, id, uriInfo, request);
     }
 
     @LogDuration(limit = 50)
@@ -167,5 +196,14 @@ public class EventServiceExposure {
     interface EventsCategoryProducerMethod {
         Response getResponse(String interval, String category, UriInfo uriInfo, Request request);
     }
+
+    Response handleUnsupportedContentType(String interval, UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
+
+    Response handleUnsupportedContentType(String category, String id, UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
+
 
 }

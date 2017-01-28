@@ -16,37 +16,40 @@ package dk.nykredit.semantic.id;
  * a potential middle name, the family name, the day in month where the person was born,
  * the month of the year where the person was born and if not unique add a sequence number.
  *
- * This is very similar to the MIFID CONCAT definitions where they unfortunately have used "#" for separation
- * and a length that will cause:
- * {@literal(
- *   - the names to be less human readable
- *   - result in name clashes
- *   - not useful as semantic ids for person in a URL
- * require more added sequence numbers.
- *
- * Therefore the proposed format is: <-sequence number>
- *  )}
- * examples:
- *<code>
+ * This is very similar to the MIFID CONCAT definitions where they unfortunately have used "#" for
+ * separation {@link #SEPARATOR} and a length {@link #LENGTH} that will cause:
+ * <ol>
+ *   <li>the names to be less human readable</li>
+ *   <li>result in name clashes</li>
+ *   <li>not useful as semantic ids for person in a URL</li>
+ * </ol>
+ * That will end up requiring more added sequence numbers.
+ * <p>
+ * Therefore the proposed format is: {@code -sequence number}
+ * <p>
+ * Examples:
+ *<pre>
  *    hans-peter-hansen-0112
  *
  *    hans-peter-hansen-0112-1
- *</code>
+ *</pre>
  * The second is created if two persons with the same name and born on the same day and month exists"
  *
- * <code>
+ * <pre>
  *    mike-hansson-0309
- * </code>
+ * </pre>
  *
- * If a "restricted length scenario" exist a length of 10 characters for first name, and 10 characters for middle name
+ * If a "restricted length scenario" exist a length of 10 characters {@link #LENGTH} for first name, and 10 characters for middle name
  * and equally 10 characters for family name has been suggested and 999 as max sequence number.
- *
+ * <p>
  * Such limitations should be written as a part of the service API and thus the consumers of services would know them.
  */
 
 public interface NonSensitiveSemanticID {
-    int LENGTH = 10; // MIFID concat is 5
-    char SEPARATOR = '-'; // MIFID concat says # which is non URL friendly
+    /** MIFID concat is 5 - currently it is set to 10 here */
+    int LENGTH = 10;
+    /** MIFID concat says # which is non URL friendly, that is why - is used */
+    char SEPARATOR = '-';
 
     /**
      * @return a non sensitive human readable URL capable semantic ID for a given object

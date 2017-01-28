@@ -531,17 +531,17 @@
       "properties" : {
         "regno" : {
           "type" : "string",
-          "example" : 1234,
+          "example" : "1234",
           "description" : "Read-only"
         },
         "accountno" : {
           "type" : "string",
-          "example" : 12345678,
+          "example" : "12345678",
           "description" : "Read-only"
         },
         "name" : {
           "type" : "string",
-          "example" : NemKonto,
+          "example" : "NemKonto",
           "description" : "Readable and Writeable"
         },
         "_links" : {
@@ -564,19 +564,19 @@
       "properties" : {
         "regno" : {
           "type" : "string",
-          "example" : 1234,
+          "example" : "1234",
           "description" : "Read-only",
           "pattern" : "^[0-9]{4}$"
         },
         "accountno" : {
           "type" : "string",
-          "example" : 12345678,
+          "example" : "12345678",
           "description" : "Read-only",
           "pattern" : "^[0-9]+$"
         },
         "name" : {
           "type" : "string",
-          "example" : NemKonto,
+          "example" : "NemKonto",
           "description" : "Readable and Writeable",
           "pattern" : ".{1,40}"
         }
@@ -617,7 +617,7 @@
         },
         "message" : {
           "type" : "string",
-          "example" : this error happened due to this situation,
+          "example" : "this error happened due to this situation",
           "description" : "Read-only"
         },
         "_links" : {
@@ -656,7 +656,7 @@
         },
         "category" : {
           "type" : "string",
-          "example" : 1234-12345678,
+          "example" : "1234-12345678",
           "description" : "Readable and Writeable"
         },
         "_links" : {
@@ -851,7 +851,7 @@
         },
         "description" : {
           "type" : "string",
-          "example" : Starbucks Coffee,
+          "example" : "Starbucks Coffee",
           "description" : "Read-only"
         },
         "amount" : {
@@ -876,7 +876,7 @@
       "properties" : {
         "description" : {
           "type" : "string",
-          "example" : Starbucks Coffee,
+          "example" : "Starbucks Coffee",
           "description" : "Readable and Writeable",
           "pattern" : ".{1,256}"
         },

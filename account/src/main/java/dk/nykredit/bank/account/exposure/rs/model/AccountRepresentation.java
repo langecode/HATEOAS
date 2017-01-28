@@ -65,8 +65,7 @@ public class AccountRepresentation {
             access = "public",
             name = "regno",
             example = "1234",
-            notes = "the registration number preceeding the account  number.",
-            value = "Read-only")
+            value = "the registration number preceeding the account  number.")
     public String getRegNo() {
         return regNo;
     }
@@ -75,8 +74,7 @@ public class AccountRepresentation {
             access = "public",
             name = "accountno",
             example = "12345678",
-            notes = "the account  number.",
-            value = "Read-only")
+            value = "the account  number.")
     public String getAccountNo() {
         return accountNo;
     }
@@ -85,8 +83,7 @@ public class AccountRepresentation {
             access = "public",
             name = "name",
             example = "NemKonto",
-            notes = "the human readable name of the account.",
-            value = "Readable and Writeable")
+            value = "the human readable name of the account.")
     public String getName() {
         return name;
     }
@@ -94,8 +91,7 @@ public class AccountRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "transactions",
-            notes = "the transactions that have taken place for the account.",
-            value = "Read-only")
+            value = "the transactions that have taken place for the account.")
     public Collection<TransactionRepresentation> getTransactions() {
         if (transactions == null) {
             return null;

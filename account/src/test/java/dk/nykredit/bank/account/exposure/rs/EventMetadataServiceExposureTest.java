@@ -40,6 +40,9 @@ public class EventMetadataServiceExposureTest {
         assertNotNull(info);
         assertTrue(info.getMetadata().contains("purpose"));
         assertEquals("http://mock/account-events-metadata", info.getSelf().getHref());
+
+        response = service.getMetadata("application/hal+json;concept=metadata", ui, request);
+        assertEquals(415,response.getStatus());
     }
 
     @Test

@@ -86,6 +86,10 @@ public class EventServiceExposureTest {
             }
         }
         assertEquals(3, found);
+
+        response = service.listAll("application/hal+json;no-real-type", "", ui, request);
+        assertEquals(415,response.getStatus());
+
     }
 
     @Test
@@ -109,6 +113,9 @@ public class EventServiceExposureTest {
 
         assertEquals(1, events.getEvents().size());
         assertEquals("http://mock/account-events", events.getSelf().getHref());
+
+        response = service.getByCategory("application/hal+json;no-real-type", "5479-123456", "", ui, request);
+        assertEquals(415,response.getStatus());
     }
 
     @Test
@@ -133,6 +140,9 @@ public class EventServiceExposureTest {
         assertEquals("http://mock/accounts/5479-1234567/txSID", er.getOrigin().getHref());
         assertEquals("default", er.getCategory());
         assertEquals("http://mock/account-events/default/" + er.getId(), er.getSelf().getHref());
+
+        response = service.getSingle("application/hal+json;no-real-type", "5479-123456", "eventSID", ui, request);
+        assertEquals(415,response.getStatus());
 
     }
 

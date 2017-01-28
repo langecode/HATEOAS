@@ -44,7 +44,7 @@ public class ReconciledTransactionsRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "reconciledtransactions",
-            notes = "the list of reconciled transaction.")
+            value = "the list of reconciled transaction.")
     public Collection<ReconciledTransactionRepresentation> getReconciledTransactions() {
         return Collections.unmodifiableCollection(rtxs);
     }

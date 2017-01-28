@@ -1,5 +1,6 @@
 package dk.nykredit.bank.account.exposure.rs;
 
+
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,13 +45,15 @@ import dk.nykredit.nic.core.logging.LogDuration;
 import dk.nykredit.nic.rs.EntityResponseBuilder;
 import dk.nykredit.nic.rs.error.ErrorRepresentation;
 import dk.nykredit.time.CurrentTime;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.ResponseHeader;
 
 /**
@@ -82,10 +85,17 @@ public class TransactionServiceExposure {
     @Produces({ "application/hal+json", "application/hal+json;concept=transactionoverview;v=1" })
     @ApiOperation(
             value = "obtain all transactions on account for a given account", response = TransactionsRepresentation.class,
-            authorizations = {@Authorization(value = "oauth", scopes = {
-                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
             },
+            extensions = {@Extension(name = "roles", properties = {
+                    @ExtensionProperty(name = "customer", value = "customer allows getting from own account"),
+                    @ExtensionProperty(name = "advisor", value = "advisor allows getting from every account")}
+            )},
             tags = {"sort", "elements", "interval", "transactions"},
             produces = "application/hal+json, application/hal+json;concept=transactionoverview;v=1",
             nickname = "listTransactions"
@@ -95,7 +105,8 @@ public class TransactionServiceExposure {
                          @QueryParam("sort") String sort, @QueryParam("elements") String elements,
                          @QueryParam("interval") String interval,
                          @Context UriInfo uriInfo, @Context Request request) {
-        return transactionsProducers.get(accept).getResponse(regNo, accountNo, sort, elements, interval, uriInfo, request);
+        return transactionsProducers.getOrDefault(accept, this::handleUnsupportedContentType)
+                .getResponse(regNo, accountNo, sort, elements, interval, uriInfo, request);
     }
 
     @GET
@@ -104,14 +115,22 @@ public class TransactionServiceExposure {
     @LogDuration(limit = 50)
     @ApiOperation(
             value = "obtain the individual single transaction from an account", response = TransactionRepresentation.class,
-            authorizations = {@Authorization(value = "oauth", scopes = {
-                    @AuthorizationScope(scope = "customer", description = "allows getting own account"),
-                    @AuthorizationScope(scope = "advisor", description = "allows getting every account")})
+            authorizations = {
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
             },
+            extensions = {@Extension(name = "roles", properties = {
+                    @ExtensionProperty(name = "customer", value = "customer allows getting from own account"),
+                    @ExtensionProperty(name = "advisor", value = "advisor allows getting from every account")}
+            )},
             produces = "application/hal+json, application/hal+json;concept=transaction;v=1",
             nickname = "getTransaction")
     @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "No transaction found.")
+            @ApiResponse(code = 404, message = "No transaction found."),
+            @ApiResponse(code = 415, message = "Content type not supported.")
             })
     /**
      * the use of authorization scopes to signal roles is a bit dubious and thus this may change in the future
@@ -121,7 +140,8 @@ public class TransactionServiceExposure {
                         @PathParam("accountNo") String accountNo,
                         @PathParam("id") String id,
                         @Context UriInfo uriInfo, @Context Request request) {
-        return transactionProducers.get(accept).getResponse(regNo, accountNo, id, uriInfo, request);
+        return transactionProducers.getOrDefault(accept, this::handleUnsupportedContentType)
+                .getResponse(regNo, accountNo, id, uriInfo, request);
     }
 
     @PUT
@@ -132,16 +152,23 @@ public class TransactionServiceExposure {
     @LogDuration(limit = 50)
     @ApiOperation(value = "creates a single transaction on an account", response = TransactionRepresentation.class,
             authorizations = {
-                    @Authorization(value = "oauth", scopes = {
-                        @AuthorizationScope(scope = "system", description = "allows getting coOwned account")})
+                    @Authorization(value = "oauth2", scopes = {}),
+                    @Authorization(value = "oauth2-cc", scopes = {}),
+                    @Authorization(value = "oauth2-ac", scopes = {}),
+                    @Authorization(value = "oauth2-rop", scopes = {}),
+                    @Authorization(value = "Bearer")
             },
+            extensions = {@Extension(name = "roles", properties = {
+                    @ExtensionProperty(name = "system", value = "customer allows getting from coOwned account")}
+            )},
             consumes = "application/json",
             produces = "application/hal+json, application/hal+json;concept=transaction;v=1",
             nickname = "setTransaction")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Could create the new transaction", response = ErrorRepresentation.class),
+            @ApiResponse(code = 415, message = "Content type not supported."),
             @ApiResponse(code = 201, message = "New transaction created.", response = TransactionRepresentation.class),
-            @ApiResponse(code = 202, message = "New transaction will be created at some point in time.", response = Void.class,
+            @ApiResponse(code = 202, message = "New transaction will be created at some point in time.",
                     responseHeaders = {
                             @ResponseHeader(name = "Location", description = "A link to where the response can be obtained"),
                             @ResponseHeader(name = "Retry-After", description = "A time where you when you can expect the response ")
@@ -228,4 +255,14 @@ public class TransactionServiceExposure {
         Response getResponse(String regNo, String accountNo, String id,
                              UriInfo uriInfo, Request request);
     }
+
+    Response handleUnsupportedContentType(String regNo, String accountNo, String sort, String elements, String interval,
+                                          UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
+    Response handleUnsupportedContentType(String regNo, String accountNo, String id,
+                                          UriInfo uriInfo, Request request) {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
+
 }

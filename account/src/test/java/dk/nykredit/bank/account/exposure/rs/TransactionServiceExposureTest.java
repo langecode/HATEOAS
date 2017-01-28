@@ -53,6 +53,10 @@ public class TransactionServiceExposureTest {
 
         assertEquals(1, transactions.getTransactions().size());
         assertEquals("http://mock/accounts/5479-123456/transactions", transactions.getSelf().getHref());
+
+        response = service.list("application/hal+json;concept=non.existing;type","5479", "123456",
+                "", "", "", ui, request);
+        assertEquals(415,response.getStatus());
     }
 
     @Test
@@ -73,6 +77,9 @@ public class TransactionServiceExposureTest {
 
         assertEquals("1234.42", transaction.getAmount());
         assertEquals("http://mock/accounts/5479-123456/transactions/" + dbTransaction.getId(), transaction.getSelf().getHref());
+
+        response = service.get("application/hal+json;concept=non.existing;type", "5479", "123456", "xxx-yyy", ui, request);
+        assertEquals(415,response.getStatus());
     }
 
     @Test

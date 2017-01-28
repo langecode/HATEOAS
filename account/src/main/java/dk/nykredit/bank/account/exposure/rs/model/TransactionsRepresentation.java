@@ -57,7 +57,7 @@ public class TransactionsRepresentation {
     @ApiModelProperty(
             access = "public",
             name = "transactions",
-            notes = "the list of transaction.")
+            value = "the list of transaction.")
     public Collection<TransactionRepresentation> getTransactions() {
         return Collections.unmodifiableCollection(transactions);
     }

@@ -29,8 +29,7 @@ public class AccountUpdateRepresentation {
             name = "regno",
             required = true,
             example = "1234",
-            notes = "the registration number preceeding the account  number.",
-            value = "Read-only")
+            value = "the registration number preceeding the account  number.")
     public String getRegNo() {
         return regNo;
     }
@@ -40,8 +39,7 @@ public class AccountUpdateRepresentation {
             name = "accountno",
             required = true,
             example = "12345678",
-            notes = "the account  number.",
-            value = "Read-only")
+            value = "the account  number.")
     public String getAccountNo() {
         return accountNo;
     }
@@ -51,8 +49,8 @@ public class AccountUpdateRepresentation {
             name = "name",
             required = true,
             example = "NemKonto",
-            notes = "the human readable name of the account.",
-            value = "Readable and Writeable")
+            value = "the human readable name of the account.",
+            notes = " a NemKonto is required to have for any citizen")
     public String getName() {
         return name;
     }

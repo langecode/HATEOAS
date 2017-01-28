@@ -1,6 +1,7 @@
 package dk.nykredit.nic.persistence.jpa;
 
 import java.sql.Timestamp;
+
 import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -25,9 +26,7 @@ public class AbstractAuditable {
     /**
      * List of fields which is excluded from {@link #equals(Object)} and {@link #hashCode()} by default.
      */
-    private static final String[] DEFAULT_EXCLUDED_FIELDS = new String[]{
-            "tId", "lastModifiedBy", "lastModifiedTime"
-    };
+    private static final String[] DEFAULT_EXCLUDED_FIELDS = new String[]{"tId", "lastModifiedBy", "lastModifiedTime"};
 
     @Column(name = "LAST_MODIFIED_BY", length = 100, nullable = true, columnDefinition = "VARCHAR(100)")
     private String lastModifiedBy;
