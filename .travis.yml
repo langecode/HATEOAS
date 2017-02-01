@@ -1,4 +1,4 @@
 language: java
 script: mvn clean package
 jdk:
-  - openjdk8
+  - oraclejdk8
