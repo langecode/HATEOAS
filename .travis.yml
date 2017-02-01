@@ -8,9 +8,4 @@ install:
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$PWD/apache-maven-3.3.9/bin:$PATH
 
-script:
-  - mvn -v
-  - $PWD/apache-maven-3.3.9/bin/mvn -v
-  - export M2_HOME=$PWD/apache-maven-3.3.9
-  - $PWD/apache-maven-3.3.9/bin/mvn -v
-  - $PWD/apache-maven-3.3.9/bin/mvn clean package
+script: mvn clean package
