@@ -16,7 +16,9 @@ install:
 script: mvn clean package
 
 after_success:
-  - docker build -t hateoas .
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker build -t hateoas .;
+    fi
 
 cache:
   directories:
