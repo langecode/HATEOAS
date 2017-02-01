@@ -2,5 +2,10 @@ language: java
 script: mvn clean package
 jdk:
   - oraclejdk8
+before_install:
+  - mv /usr/local/maven /usr/local/maven.orig
+  - wget http://www-eu.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+  - tar xzvf apache-maven-3.3.9-bin.tar.gz
+  - mv apache-maven-3.3.9 /usr/local/maven
 before_script:
   - type mvn
